@@ -434,7 +434,10 @@
   <script src="../dist/web-voice-assistant.js">
   </script>
   <script>
-    const assistant = new WebVoiceAssistant();
+    const assistant = new WebVoiceAssistant({
+      language: 'en-US',
+      contextSize: 5000
+    });
 
   </script>
 </body>

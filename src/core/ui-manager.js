@@ -1,5 +1,5 @@
 WebVoiceAssistant.UIManager = class {
-    constructor(config, speak, startListening, stopListening, isListening, getCommand) {
+    constructor(config, speak, startListening, stopListening, isListening, getCommand, cancelSpeak, speechConfig) {
         this.config = config || {};
         this.assistant = {};
         this.messages = [];
@@ -8,8 +8,11 @@ WebVoiceAssistant.UIManager = class {
         this.stopListening = stopListening;
         this.isListening = isListening;
         this.getCommand = getCommand;
+        this.isCancelBtnVisible = false;
+        this.cancelSpeak = cancelSpeak;
+        this.speechConfig = speechConfig || {};
 
-        // Default configuration
+        
         this.config = {
             position: 'bottom-right',
             buttonSize: 60,
@@ -52,10 +55,32 @@ WebVoiceAssistant.UIManager = class {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s ease;
+                transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3),
+                           0 4px 16px rgba(118, 75, 162, 0.2),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+            }
+            
+            .wva-button::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                transform: rotate(-45deg);
+                transition: all 0.6s;
+                opacity: 0;
+            }
+            
+            .wva-button:hover::before {
+                opacity: 1;
+                animation: wva-shimmer 1.5s ease-in-out;
             }
             
             .wva-record-button{
@@ -67,32 +92,65 @@ WebVoiceAssistant.UIManager = class {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s ease;
+                transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 6px 24px rgba(102, 126, 234, 0.25),
+                           0 3px 12px rgba(118, 75, 162, 0.15),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+            }
+            
+            .wva-record-button::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                transform: rotate(-45deg);
+                transition: all 0.6s;
+                opacity: 0;
             }
 
             .btn-container{
-            width:100%;
-            padding:4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+                width: 100%;
+                padding: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(180deg, #495287 0%, #12131a 100%);
+                border-top: 1px solid rgba(102, 126, 234, 0.1);
             }
 
             .wva-button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4),
+                           0 6px 20px rgba(118, 75, 162, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            }
+            
+            .wva-record-button:hover {
+                transform: translateY(-2px) scale(1.03);
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35),
+                           0 4px 16px rgba(118, 75, 162, 0.25);
             }
 
             .wva-record-button.listening {
                 background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
+                box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4),
+                           0 4px 16px rgba(238, 90, 36, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
                 animation: wva-pulse 1.5s infinite;
             }
 
             .wva-record-button.processing {
                 background: linear-gradient(135deg, #feca57, #ff9ff3) !important;
+                box-shadow: 0 8px 32px rgba(254, 202, 87, 0.4),
+                           0 4px 16px rgba(255, 159, 243, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
                 animation: wva-spin 1s linear infinite;
             }
 
@@ -101,6 +159,14 @@ WebVoiceAssistant.UIManager = class {
                 width: 24px;
                 height: 24px;
                 fill: white;
+                filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+                transition: all 0.3s ease;
+            }
+            
+            .wva-button:hover .wva-icon,
+            .wva-record-button:hover .wva-icon {
+                transform: scale(1.1);
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             }
 
             /* Chat panel */
@@ -108,113 +174,291 @@ WebVoiceAssistant.UIManager = class {
                 position: absolute;
                 width: ${this.config.panelWidth}px;
                 height: ${this.config.panelHeight}px;
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12),
+                           0 12px 40px rgba(0, 0, 0, 0.08),
+                           0 6px 20px rgba(0, 0, 0, 0.04),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.8);
                 display: none;
                 flex-direction: column;
                 overflow: hidden;
-                bottom: ${this.config.buttonSize + 10}px;
+                bottom: ${this.config.buttonSize + 15}px;
                 right: 0;
+                border: 1px solid rgba(255, 255, 255, 0.2);
             }
 
             .wva-chat-panel.active {
                 display: flex;
-                animation: wva-slideUp 0.3s ease-out;
+                animation: wva-slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
 
             /* Chat header */
             .wva-chat-header {
-                padding: 16px;
+                padding: 20px;
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 font-weight: 600;
                 position: relative;
+                font-size: 16px;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
+            }
+            
+            .wva-chat-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+                pointer-events: none;
             }
 
             .wva-close-btn {
                 position: absolute;
-                top: 12px;
-                right: 16px;
-                background: none;
-                border: none;
-                color: rgba(255, 255, 255, 0.8);
+                top: 16px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                color: white;
                 cursor: pointer;
-                font-size: 18px;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+            
+            .wva-close-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
 
             /* Messages area */
             .wva-messages {
                 flex: 1;
-                padding: 16px;
+                padding: 20px;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 16px;
+                background: linear-gradient(135deg, #fafbff 0%, #f5f7ff 100%);
+            }
+            
+            .wva-messages::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .wva-messages::-webkit-scrollbar-track {
+                background: rgba(102, 126, 234, 0.05);
+                border-radius: 3px;
+            }
+            
+            .wva-messages::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 3px;
             }
 
             /* Message bubbles */
             .wva-message {
-                max-width: 80%;
-                padding: 10px 14px;
-                border-radius: 16px;
+                max-width: 85%;
+                padding: 12px 16px;
+                border-radius: 18px;
                 font-size: 14px;
-                line-height: 1.4;
+                line-height: 1.5;
+                position: relative;
+                word-wrap: break-word;
+                animation: wva-messageSlide 0.3s ease-out;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                backdrop-filter: blur(10px);
             }
 
             .wva-message.user {
-                background: #667eea;
+                background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 align-self: flex-end;
-                border-bottom-right-radius: 4px;
+                border-bottom-right-radius: 6px;
+                box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+            }
+            
+            .wva-message.user::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+                border-radius: inherit;
+                pointer-events: none;
             }
 
             .wva-message.assistant {
-                background: #f1f3f5;
-                color: #333;
+                background: rgba(255, 255, 255, 0.8);
+                color: #2d3748;
                 align-self: flex-start;
-                border-bottom-left-radius: 4px;
+                border-bottom-left-radius: 6px;
+                border: 1px solid rgba(102, 126, 234, 0.1);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             }
 
             /* Status bar */
+            /* Actions container */
+            .wva-actions-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                border-top: 1px solid rgba(102, 126, 234, 0.1);
+                background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+                gap: 12px;
+            }
+
             .wva-status {
-                padding: 12px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #4a5568;
+                letter-spacing: 0.3px;
+                position: relative;
+                flex: 1;
+                text-align: left;
+            }
+            
+            .wva-status::before {
+                content: '';
+                position: absolute;
+                top: -16px;
+                left: 0;
+                width: 40px;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+            }
+
+            /* Cancel Speech Button */
+            .cancel-speech-btn {
+                padding: 8px 16px;
+                border: 1px solid rgba(102, 126, 234, 0.2);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.8);
+                color: #667eea;
                 font-size: 12px;
-                color: #666;
-                text-align: center;
-                border-top: 1px solid #eee;
-                background: #fafafa;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                backdrop-filter: blur(10px);
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+                display: none;
+            }
+            
+            .cancel-speech-btn:hover {
+                background: rgba(102, 126, 234, 0.1);
+                border-color: rgba(102, 126, 234, 0.3);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            }
+            
+            .cancel-speech-btn:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
             }
 
             .wva-status.listening {
-                background: #fff5f5;
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
                 color: #e53e3e;
+                animation: wva-statusPulse 2s infinite;
             }
 
             .wva-status.processing {
-                background: #fffbeb;
+                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
                 color: #d69e2e;
+                animation: wva-statusWave 1.5s infinite;
             }
 
             .wva-status.ready {
-                background: #f5f6ff;
-                color: #3547e8;
+                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+                color: #38a169;
+            }
+            
+            .wva-actions-container.listening {
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
             }
 
-            /* Animations */
+            .wva-actions-container.processing {
+                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
+            }
+
+            .wva-actions-container.ready {
+                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+            }
+
+            /* Enhanced Animations */
             @keyframes wva-pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.1); }
+                0%, 100% { 
+                    transform: scale(1);
+                    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4),
+                               0 4px 16px rgba(238, 90, 36, 0.3),
+                               0 0 0 0 rgba(255, 107, 107, 0.7);
+                }
+                50% { 
+                    transform: scale(1.05);
+                    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5),
+                               0 6px 20px rgba(238, 90, 36, 0.4),
+                               0 0 0 10px rgba(255, 107, 107, 0);
+                }
             }
 
             @keyframes wva-spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+            
+            @keyframes wva-shimmer {
+                0% { transform: translateX(-100%) rotate(-45deg); }
+                100% { transform: translateX(100%) rotate(-45deg); }
+            }
 
             @keyframes wva-slideUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+                from { 
+                    opacity: 0; 
+                    transform: translateY(30px) scale(0.95);
+                    filter: blur(5px);
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0) scale(1);
+                    filter: blur(0);
+                }
+            }
+            
+            @keyframes wva-messageSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes wva-statusPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            
+            @keyframes wva-statusWave {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-2px); }
+                75% { transform: translateX(2px); }
             }
 
             /* Responsive design */
@@ -223,6 +467,54 @@ WebVoiceAssistant.UIManager = class {
                     width: calc(100vw - 40px);
                     right: 20px !important;
                     left: 20px !important;
+                    height: calc(100vh - 120px);
+                    max-height: ${this.config.panelHeight}px;
+                }
+                
+                .wva-messages {
+                    padding: 16px;
+                }
+                
+                .wva-chat-header {
+                    padding: 16px;
+                }
+            }
+            
+            /* Dark mode support */
+            @media (prefers-color-scheme: dark) {
+                .wva-chat-panel {
+                    background: rgba(26, 32, 44, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                
+                .wva-messages {
+                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                }
+                
+                .wva-message.assistant {
+                    background: rgba(45, 55, 72, 0.8);
+                    color: #e2e8f0;
+                    border: 1px solid rgba(102, 126, 234, 0.2);
+                }
+                
+                .wva-status {
+                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+                    color: #a0aec0;
+                }
+                
+                .wva-actions-container {
+                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+                }
+                
+                .cancel-speech-btn {
+                    background: rgba(102, 126, 234, 0.1);
+                    border: 1px solid rgba(102, 126, 234, 0.3);
+                    color: #90cdf4;
+                }
+                
+                .cancel-speech-btn:hover {
+                    background: rgba(102, 126, 234, 0.2);
+                    border-color: rgba(102, 126, 234, 0.4);
                 }
             }
         `;
@@ -230,11 +522,11 @@ WebVoiceAssistant.UIManager = class {
     }
 
     createUI() {
-        // Create main container
+        
         this.container = document.createElement('div');
         this.container.className = `wva-container wva-position-${this.config.position}`;
 
-        // Create microphone button
+        
         this.button = document.createElement('button');
         this.button.className = 'wva-button';
         this.button.title = 'Start voice interaction';
@@ -264,7 +556,7 @@ WebVoiceAssistant.UIManager = class {
 </svg>
         `;
 
-        // Create chat panel
+       
         this.chatPanel = document.createElement('div');
         this.chatPanel.className = 'wva-chat-panel';
         this.chatPanel.innerHTML = `
@@ -273,7 +565,10 @@ WebVoiceAssistant.UIManager = class {
                 <button class="wva-close-btn" title="Close chat">×</button>
             </div>
             <div class="wva-messages"></div>
-            <div class="wva-status">Ready</div>
+            <div class="wva-actions-container">
+                <div class="wva-status">Ready</div>
+                <button class="cancel-speech-btn">Cancel Speech</button>
+            </div>
             <div class="btn-container">
              <button class="wva-record-button">
              <svg class="wva-icon" viewBox="0 0 24 24">
@@ -284,18 +579,20 @@ WebVoiceAssistant.UIManager = class {
            
         `;
 
-        // Store references
+        
         this.messagesEl = this.chatPanel.querySelector('.wva-messages');
         this.statusEl = this.chatPanel.querySelector('.wva-status');
         this.closeBtn = this.chatPanel.querySelector('.wva-close-btn');
         this.recordBtn = this.chatPanel.querySelector(".wva-record-button")
+        this.cancelSpeechBtn = this.chatPanel.querySelector(".cancel-speech-btn");
+        this.actionsContainer = this.chatPanel.querySelector(".wva-actions-container")
 
-        // Assemble UI
+       
         this.container.appendChild(this.button);
         this.container.appendChild(this.chatPanel);
         document.body.appendChild(this.container);
 
-        // Add welcome message
+        
         this.addMessage('Hello! How can I help you today?', 'assistant');
     }
 
@@ -312,10 +609,23 @@ WebVoiceAssistant.UIManager = class {
 
         this.closeBtn.addEventListener('click', () => this.toggleChat(false));
 
-        // Toggle chat on click
+        this.cancelSpeechBtn.addEventListener('click', () => {
+            this.cancelSpeak();
+            this.updateCancelBtnStatus(false)
+            this.updateUI({ isReady: true });
+            console.log('Speech cancelled');
+        });
+
+        
         this.button.addEventListener('click', () => {
             this.toggleChat()
-            this.speak('Hello! How can I help you today?')
+            this.updateCancelBtnStatus(true)
+            this.speak('Hello! How can I help you today?', { language: this.speechConfig.language, rate: this.speechConfig.rate }).then((status) => {
+                if (status === false) {
+                    this.updateCancelBtnStatus(false)
+                    console.log(status)
+                }
+            })
         });
     }
 
@@ -330,6 +640,7 @@ WebVoiceAssistant.UIManager = class {
     updateStatus(text, state) {
         this.statusEl.textContent = text;
         this.statusEl.className = 'wva-status' + (state ? ` ${state}` : '');
+        this.actionsContainer.className = 'wva-actions-container' + (state ? ` ${state}` : '');
     }
 
     toggleChat(forceState) {
@@ -342,9 +653,13 @@ WebVoiceAssistant.UIManager = class {
         console.log(this.userCommand, " < this is what you said")
     }
 
+    updateCancelBtnStatus(shouldShow) {
+        this.isCancelBtnVisible = shouldShow;
+        this.cancelSpeechBtn.style.display = shouldShow ? "block" : "none";
+    }
+
     updateUI(state) {
         this.recordBtn.className = 'wva-record-button';
-
         if (state.isListening) {
             this.recordBtn.classList.add('listening');
             this.updateStatus('Listening...', 'listening');
@@ -357,7 +672,7 @@ WebVoiceAssistant.UIManager = class {
     }
 };
 
-// Export for Node.js
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { UIManager: WebVoiceAssistant.UIManager };
 }

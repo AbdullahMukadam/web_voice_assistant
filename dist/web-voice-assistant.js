@@ -1,119 +1,133 @@
-(function() {
+(function () {
     // Use the global window object if available, otherwise fallback to a local object
     var globalObj = (typeof window !== 'undefined') ? window : this;
     globalObj.WebVoiceAssistant = globalObj.WebVoiceAssistant || {};
     var WebVoiceAssistant = globalObj.WebVoiceAssistant;
-    
+
     // Core modules - wrap each in IIFE to prevent collisions
-    (function() {
-            WebVoiceAssistant.extractPageContext = function() {
-    const content = [];
+    (function () {
+        WebVoiceAssistant.extractPageContext = function () {
+            const content = [];
 
-    // Get title
-    if (document.title) {
-        content.push(`Page Title: ${document.title}`);
-    }
+            // Get title
+            if (document.title) {
+                content.push(`Page Title: ${document.title}`);
+            }
 
-    // Get meta description
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-        content.push(`Page Description: ${metaDesc.content}`);
-    }
+            // Get meta description
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                content.push(`Page Description: ${metaDesc.content}`);
+            }
 
-    // Get headings
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach(h => {
-        if (h.textContent.trim() && !h.closest('.wva-container')) {
-            content.push(`${h.tagName}: ${h.textContent.trim()}`);
+            // Get headings
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            headings.forEach(h => {
+                if (h.textContent.trim() && !h.closest('.wva-container')) {
+                    content.push(`${h.tagName}: ${h.textContent.trim()}`);
+                }
+            });
+
+            // Get main content paragraphs
+            const paragraphs = document.querySelectorAll('p, li');
+            paragraphs.forEach(p => {
+                if (p.textContent.trim().length > 30 && !p.closest('.wva-container')) {
+                    content.push(`Content: ${p.textContent.trim()}`);
+                }
+            });
+
+            // Get form labels and inputs
+            const formElements = document.querySelectorAll('label, input[placeholder], textarea[placeholder]');
+            formElements.forEach(el => {
+                if (el.textContent?.trim() || el.placeholder) {
+                    content.push(`Form: ${el.textContent?.trim() || el.placeholder}`);
+                }
+            });
+
+            return content.join('\n').substring(0, 5000); // Limit context size
         }
-    });
-
-    // Get main content paragraphs
-    const paragraphs = document.querySelectorAll('p, li');
-    paragraphs.forEach(p => {
-        if (p.textContent.trim().length > 30 && !p.closest('.wva-container')) {
-            content.push(`Content: ${p.textContent.trim()}`);
-        }
-    });
-
-    // Get form labels and inputs
-    const formElements = document.querySelectorAll('label, input[placeholder], textarea[placeholder]');
-    formElements.forEach(el => {
-        if (el.textContent?.trim() || el.placeholder) {
-            content.push(`Form: ${el.textContent?.trim() || el.placeholder}`);
-        }
-    });
-
-    return content.join('\n').substring(0, 5000); // Limit context size
-}
 
 
-        })();
+    })();
 
-(function() {
-            WebVoiceAssistant.SpeechRecognition = {
-    setup: function ({ language, onResult }) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return null;
+    (function () {
+        WebVoiceAssistant.SpeechRecognition = {
+            setup: function ({ language, onResult }) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return null;
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = language || 'en-US';
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            onResult(transcript);
-        };
-        return recognition;
-    }
-};
-
-
-
-        })();
-
-(function() {
-            const synthesis = window.speechSynthesis;
-
-WebVoiceAssistant.speak = function(text) {
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9
-    synthesis.speak(utterance)
-}
-
-
-        })();
-
-(function() {
-            WebVoiceAssistant.UIManager = class {
-    constructor(config, speak, startListening, stopListening, isListening, getCommand) {
-        this.config = config || {};
-        this.assistant = {};
-        this.messages = [];
-        this.speak = speak;
-        this.startListening = startListening;
-        this.stopListening = stopListening;
-        this.isListening = isListening;
-        this.getCommand = getCommand;
-
-        // Default configuration
-        this.config = {
-            position: 'bottom-right',
-            buttonSize: 60,
-            panelWidth: 350,
-            panelHeight: 450,
-            ...this.config
+                const recognition = new SpeechRecognition();
+                recognition.lang = language || 'en-US';
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    onResult(transcript);
+                };
+                return recognition;
+            }
         };
 
-        this.injectStyles();
-        this.createUI();
-        this.bindEvents();
-    }
 
-    injectStyles() {
-        if (document.getElementById('wva-styles')) return;
 
-        const style = document.createElement('style');
-        style.id = 'wva-styles';
-        style.textContent = `
+    })();
+
+    (function () {
+        const synthesis = window.speechSynthesis;
+
+        WebVoiceAssistant.speak = function (text, { language, rate } = {}) {
+            return new Promise((resolve) => {
+                let utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = rate || 0.9;
+                utterance.lang = language || 'en-US';
+                synthesis.speak(utterance)
+                utterance.onend = () => {
+                    resolve(false)
+                }
+            })
+
+        }
+
+        WebVoiceAssistant.cancelSpeak = function () {
+            synthesis.cancel()
+        }
+
+
+    })();
+
+    (function () {
+        WebVoiceAssistant.UIManager = class {
+            constructor(config, speak, startListening, stopListening, isListening, getCommand, cancelSpeak, speechConfig) {
+                this.config = config || {};
+                this.assistant = {};
+                this.messages = [];
+                this.speak = speak;
+                this.startListening = startListening;
+                this.stopListening = stopListening;
+                this.isListening = isListening;
+                this.getCommand = getCommand;
+                this.isCancelBtnVisible = false;
+                this.cancelSpeak = cancelSpeak;
+                this.speechConfig = speechConfig || {};
+
+                // Default configuration
+                this.config = {
+                    position: 'bottom-right',
+                    buttonSize: 60,
+                    panelWidth: 350,
+                    panelHeight: 450,
+                    ...this.config
+                };
+
+                this.injectStyles();
+                this.createUI();
+                this.bindEvents();
+            }
+
+            injectStyles() {
+                if (document.getElementById('wva-styles')) return;
+
+                const style = document.createElement('style');
+                style.id = 'wva-styles';
+                style.textContent = `
             /* Main container */
             .wva-container {
                 position: fixed;
@@ -137,10 +151,32 @@ WebVoiceAssistant.speak = function(text) {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s ease;
+                transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3),
+                           0 4px 16px rgba(118, 75, 162, 0.2),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+            }
+            
+            .wva-button::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                transform: rotate(-45deg);
+                transition: all 0.6s;
+                opacity: 0;
+            }
+            
+            .wva-button:hover::before {
+                opacity: 1;
+                animation: wva-shimmer 1.5s ease-in-out;
             }
             
             .wva-record-button{
@@ -152,32 +188,65 @@ WebVoiceAssistant.speak = function(text) {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s ease;
+                transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 6px 24px rgba(102, 126, 234, 0.25),
+                           0 3px 12px rgba(118, 75, 162, 0.15),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+            }
+            
+            .wva-record-button::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                transform: rotate(-45deg);
+                transition: all 0.6s;
+                opacity: 0;
             }
 
             .btn-container{
-            width:100%;
-            padding:4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+                width: 100%;
+                padding: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(180deg, #495287 0%, #12131a 100%);
+                border-top: 1px solid rgba(102, 126, 234, 0.1);
             }
 
             .wva-button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4),
+                           0 6px 20px rgba(118, 75, 162, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            }
+            
+            .wva-record-button:hover {
+                transform: translateY(-2px) scale(1.03);
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35),
+                           0 4px 16px rgba(118, 75, 162, 0.25);
             }
 
             .wva-record-button.listening {
                 background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
+                box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4),
+                           0 4px 16px rgba(238, 90, 36, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
                 animation: wva-pulse 1.5s infinite;
             }
 
             .wva-record-button.processing {
                 background: linear-gradient(135deg, #feca57, #ff9ff3) !important;
+                box-shadow: 0 8px 32px rgba(254, 202, 87, 0.4),
+                           0 4px 16px rgba(255, 159, 243, 0.3),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
                 animation: wva-spin 1s linear infinite;
             }
 
@@ -186,6 +255,14 @@ WebVoiceAssistant.speak = function(text) {
                 width: 24px;
                 height: 24px;
                 fill: white;
+                filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+                transition: all 0.3s ease;
+            }
+            
+            .wva-button:hover .wva-icon,
+            .wva-record-button:hover .wva-icon {
+                transform: scale(1.1);
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             }
 
             /* Chat panel */
@@ -193,113 +270,291 @@ WebVoiceAssistant.speak = function(text) {
                 position: absolute;
                 width: ${this.config.panelWidth}px;
                 height: ${this.config.panelHeight}px;
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12),
+                           0 12px 40px rgba(0, 0, 0, 0.08),
+                           0 6px 20px rgba(0, 0, 0, 0.04),
+                           inset 0 1px 2px rgba(255, 255, 255, 0.8);
                 display: none;
                 flex-direction: column;
                 overflow: hidden;
-                bottom: ${this.config.buttonSize + 10}px;
+                bottom: ${this.config.buttonSize + 15}px;
                 right: 0;
+                border: 1px solid rgba(255, 255, 255, 0.2);
             }
 
             .wva-chat-panel.active {
                 display: flex;
-                animation: wva-slideUp 0.3s ease-out;
+                animation: wva-slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
 
             /* Chat header */
             .wva-chat-header {
-                padding: 16px;
+                padding: 20px;
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 font-weight: 600;
                 position: relative;
+                font-size: 16px;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
+            }
+            
+            .wva-chat-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+                pointer-events: none;
             }
 
             .wva-close-btn {
                 position: absolute;
-                top: 12px;
-                right: 16px;
-                background: none;
-                border: none;
-                color: rgba(255, 255, 255, 0.8);
+                top: 16px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                color: white;
                 cursor: pointer;
-                font-size: 18px;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+            
+            .wva-close-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
 
             /* Messages area */
             .wva-messages {
                 flex: 1;
-                padding: 16px;
+                padding: 20px;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 16px;
+                background: linear-gradient(135deg, #fafbff 0%, #f5f7ff 100%);
+            }
+            
+            .wva-messages::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .wva-messages::-webkit-scrollbar-track {
+                background: rgba(102, 126, 234, 0.05);
+                border-radius: 3px;
+            }
+            
+            .wva-messages::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 3px;
             }
 
             /* Message bubbles */
             .wva-message {
-                max-width: 80%;
-                padding: 10px 14px;
-                border-radius: 16px;
+                max-width: 85%;
+                padding: 12px 16px;
+                border-radius: 18px;
                 font-size: 14px;
-                line-height: 1.4;
+                line-height: 1.5;
+                position: relative;
+                word-wrap: break-word;
+                animation: wva-messageSlide 0.3s ease-out;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                backdrop-filter: blur(10px);
             }
 
             .wva-message.user {
-                background: #667eea;
+                background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 align-self: flex-end;
-                border-bottom-right-radius: 4px;
+                border-bottom-right-radius: 6px;
+                box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+            }
+            
+            .wva-message.user::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+                border-radius: inherit;
+                pointer-events: none;
             }
 
             .wva-message.assistant {
-                background: #f1f3f5;
-                color: #333;
+                background: rgba(255, 255, 255, 0.8);
+                color: #2d3748;
                 align-self: flex-start;
-                border-bottom-left-radius: 4px;
+                border-bottom-left-radius: 6px;
+                border: 1px solid rgba(102, 126, 234, 0.1);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             }
 
             /* Status bar */
+            /* Actions container */
+            .wva-actions-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                border-top: 1px solid rgba(102, 126, 234, 0.1);
+                background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+                gap: 12px;
+            }
+
             .wva-status {
-                padding: 12px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #4a5568;
+                letter-spacing: 0.3px;
+                position: relative;
+                flex: 1;
+                text-align: left;
+            }
+            
+            .wva-status::before {
+                content: '';
+                position: absolute;
+                top: -16px;
+                left: 0;
+                width: 40px;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+            }
+
+            /* Cancel Speech Button */
+            .cancel-speech-btn {
+                padding: 8px 16px;
+                border: 1px solid rgba(102, 126, 234, 0.2);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.8);
+                color: #667eea;
                 font-size: 12px;
-                color: #666;
-                text-align: center;
-                border-top: 1px solid #eee;
-                background: #fafafa;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                backdrop-filter: blur(10px);
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+                display: none;
+            }
+            
+            .cancel-speech-btn:hover {
+                background: rgba(102, 126, 234, 0.1);
+                border-color: rgba(102, 126, 234, 0.3);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            }
+            
+            .cancel-speech-btn:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
             }
 
             .wva-status.listening {
-                background: #fff5f5;
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
                 color: #e53e3e;
+                animation: wva-statusPulse 2s infinite;
             }
 
             .wva-status.processing {
-                background: #fffbeb;
+                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
                 color: #d69e2e;
+                animation: wva-statusWave 1.5s infinite;
             }
 
             .wva-status.ready {
-                background: #f5f6ff;
-                color: #3547e8;
+                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+                color: #38a169;
+            }
+            
+            .wva-actions-container.listening {
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
             }
 
-            /* Animations */
+            .wva-actions-container.processing {
+                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
+            }
+
+            .wva-actions-container.ready {
+                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+            }
+
+            /* Enhanced Animations */
             @keyframes wva-pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.1); }
+                0%, 100% { 
+                    transform: scale(1);
+                    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.4),
+                               0 4px 16px rgba(238, 90, 36, 0.3),
+                               0 0 0 0 rgba(255, 107, 107, 0.7);
+                }
+                50% { 
+                    transform: scale(1.05);
+                    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5),
+                               0 6px 20px rgba(238, 90, 36, 0.4),
+                               0 0 0 10px rgba(255, 107, 107, 0);
+                }
             }
 
             @keyframes wva-spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+            
+            @keyframes wva-shimmer {
+                0% { transform: translateX(-100%) rotate(-45deg); }
+                100% { transform: translateX(100%) rotate(-45deg); }
+            }
 
             @keyframes wva-slideUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+                from { 
+                    opacity: 0; 
+                    transform: translateY(30px) scale(0.95);
+                    filter: blur(5px);
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0) scale(1);
+                    filter: blur(0);
+                }
+            }
+            
+            @keyframes wva-messageSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes wva-statusPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            
+            @keyframes wva-statusWave {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-2px); }
+                75% { transform: translateX(2px); }
             }
 
             /* Responsive design */
@@ -308,22 +563,70 @@ WebVoiceAssistant.speak = function(text) {
                     width: calc(100vw - 40px);
                     right: 20px !important;
                     left: 20px !important;
+                    height: calc(100vh - 120px);
+                    max-height: ${this.config.panelHeight}px;
+                }
+                
+                .wva-messages {
+                    padding: 16px;
+                }
+                
+                .wva-chat-header {
+                    padding: 16px;
+                }
+            }
+            
+            /* Dark mode support */
+            @media (prefers-color-scheme: dark) {
+                .wva-chat-panel {
+                    background: rgba(26, 32, 44, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                
+                .wva-messages {
+                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                }
+                
+                .wva-message.assistant {
+                    background: rgba(45, 55, 72, 0.8);
+                    color: #e2e8f0;
+                    border: 1px solid rgba(102, 126, 234, 0.2);
+                }
+                
+                .wva-status {
+                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+                    color: #a0aec0;
+                }
+                
+                .wva-actions-container {
+                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+                }
+                
+                .cancel-speech-btn {
+                    background: rgba(102, 126, 234, 0.1);
+                    border: 1px solid rgba(102, 126, 234, 0.3);
+                    color: #90cdf4;
+                }
+                
+                .cancel-speech-btn:hover {
+                    background: rgba(102, 126, 234, 0.2);
+                    border-color: rgba(102, 126, 234, 0.4);
                 }
             }
         `;
-        document.head.appendChild(style);
-    }
+                document.head.appendChild(style);
+            }
 
-    createUI() {
-        // Create main container
-        this.container = document.createElement('div');
-        this.container.className = `wva-container wva-position-${this.config.position}`;
+            createUI() {
+                // Create main container
+                this.container = document.createElement('div');
+                this.container.className = `wva-container wva-position-${this.config.position}`;
 
-        // Create microphone button
-        this.button = document.createElement('button');
-        this.button.className = 'wva-button';
-        this.button.title = 'Start voice interaction';
-        this.button.innerHTML = `
+                // Create microphone button
+                this.button = document.createElement('button');
+                this.button.className = 'wva-button';
+                this.button.title = 'Start voice interaction';
+                this.button.innerHTML = `
            <svg class="wva-icon" viewBox="0 0 24 24">
   <!-- Robot head (main body) -->
   <rect x="6" y="7" width="12" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -349,16 +652,19 @@ WebVoiceAssistant.speak = function(text) {
 </svg>
         `;
 
-        // Create chat panel
-        this.chatPanel = document.createElement('div');
-        this.chatPanel.className = 'wva-chat-panel';
-        this.chatPanel.innerHTML = `
+                // Create chat panel
+                this.chatPanel = document.createElement('div');
+                this.chatPanel.className = 'wva-chat-panel';
+                this.chatPanel.innerHTML = `
             <div class="wva-chat-header">
                 Voice Assistant
                 <button class="wva-close-btn" title="Close chat">×</button>
             </div>
             <div class="wva-messages"></div>
-            <div class="wva-status">Ready</div>
+            <div class="wva-actions-container">
+                <div class="wva-status">Ready</div>
+                <button class="cancel-speech-btn">Cancel Speech</button>
+            </div>
             <div class="btn-container">
              <button class="wva-record-button">
              <svg class="wva-icon" viewBox="0 0 24 24">
@@ -369,308 +675,244 @@ WebVoiceAssistant.speak = function(text) {
            
         `;
 
-        // Store references
-        this.messagesEl = this.chatPanel.querySelector('.wva-messages');
-        this.statusEl = this.chatPanel.querySelector('.wva-status');
-        this.closeBtn = this.chatPanel.querySelector('.wva-close-btn');
-        this.recordBtn = this.chatPanel.querySelector(".wva-record-button")
+                // Store references
+                this.messagesEl = this.chatPanel.querySelector('.wva-messages');
+                this.statusEl = this.chatPanel.querySelector('.wva-status');
+                this.closeBtn = this.chatPanel.querySelector('.wva-close-btn');
+                this.recordBtn = this.chatPanel.querySelector(".wva-record-button")
+                this.cancelSpeechBtn = this.chatPanel.querySelector(".cancel-speech-btn");
+                this.actionsContainer = this.chatPanel.querySelector(".wva-actions-container")
 
-        // Assemble UI
-        this.container.appendChild(this.button);
-        this.container.appendChild(this.chatPanel);
-        document.body.appendChild(this.container);
+                // Assemble UI
+                this.container.appendChild(this.button);
+                this.container.appendChild(this.chatPanel);
+                document.body.appendChild(this.container);
 
-        // Add welcome message
-        this.addMessage('Hello! How can I help you today?', 'assistant');
-    }
-
-    bindEvents() {
-        this.recordBtn.addEventListener('click', () => {
-            if (this.isListening()) {
-                this.stopListening()
-                this.updateUI({ isProcessing: true })
-            } else {
-                this.startListening()
-                this.updateUI({ isListening: true })
+                // Add welcome message
+                this.addMessage('Hello! How can I help you today?', 'assistant');
             }
-        });
 
-        this.closeBtn.addEventListener('click', () => this.toggleChat(false));
+            bindEvents() {
+                this.recordBtn.addEventListener('click', () => {
+                    if (this.isListening()) {
+                        this.stopListening()
+                        this.updateUI({ isProcessing: true })
+                    } else {
+                        this.startListening()
+                        this.updateUI({ isListening: true })
+                    }
+                });
 
-        // Toggle chat on click
-        this.button.addEventListener('click', () => {
-            this.toggleChat()
-            this.speak('Hello! How can I help you today?')
-        });
-    }
+                this.closeBtn.addEventListener('click', () => this.toggleChat(false));
 
-    addMessage(text, sender) {
-        const messageEl = document.createElement('div');
-        messageEl.className = `wva-message ${sender}`;
-        messageEl.textContent = text;
-        this.messagesEl.appendChild(messageEl);
-        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
-    }
+                this.cancelSpeechBtn.addEventListener('click', () => {
+                    this.cancelSpeak();
+                    this.updateCancelBtnStatus(false)
+                    this.updateUI({ isReady: true });
+                    console.log('Speech cancelled');
+                });
 
-    updateStatus(text, state) {
-        this.statusEl.textContent = text;
-        this.statusEl.className = 'wva-status' + (state ? ` ${state}` : '');
-    }
+                // Toggle chat on click
+                this.button.addEventListener('click', () => {
+                    this.toggleChat()
+                    this.updateCancelBtnStatus(true)
+                    this.speak('Hello! How can I help you today?', { language: this.speechConfig.language, rate: this.speechConfig.rate }).then((status) => {
+                        if (status === false) {
+                            this.updateCancelBtnStatus(false)
+                            console.log(status)
+                        }
+                    })
+                });
+            }
 
-    toggleChat(forceState) {
-        const shouldOpen = forceState !== undefined ? forceState : !this.chatPanel.classList.contains('active');
-        this.chatPanel.classList.toggle('active', shouldOpen);
-    }
+            addMessage(text, sender) {
+                const messageEl = document.createElement('div');
+                messageEl.className = `wva-message ${sender}`;
+                messageEl.textContent = text;
+                this.messagesEl.appendChild(messageEl);
+                this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+            }
 
-    setCommand(text) {
-        this.userCommand = text;
-        console.log(this.userCommand, " < this is what you said")
-    }
+            updateStatus(text, state) {
+                this.statusEl.textContent = text;
+                this.statusEl.className = 'wva-status' + (state ? ` ${state}` : '');
+                this.actionsContainer.className = 'wva-actions-container' + (state ? ` ${state}` : '');
+            }
 
-    updateUI(state) {
-        this.recordBtn.className = 'wva-record-button';
+            toggleChat(forceState) {
+                const shouldOpen = forceState !== undefined ? forceState : !this.chatPanel.classList.contains('active');
+                this.chatPanel.classList.toggle('active', shouldOpen);
+            }
 
-        if (state.isListening) {
-            this.recordBtn.classList.add('listening');
-            this.updateStatus('Listening...', 'listening');
-        } else if (state.isProcessing) {
-            this.button.classList.add('processing');
-            this.updateStatus('Processing...', 'processing');
-        } else if (state.isReady) {
-            this.updateStatus('Asistant Responded', "ready");
-        }
-    }
-};
+            setCommand(text) {
+                this.userCommand = text;
+                console.log(this.userCommand, " < this is what you said")
+            }
 
-// Export for Node.js
-        })();
-    
-    // Main class - assign to namespace instead of class declaration
-    (function() {
-        WebVoiceAssistant.WebVoiceAssistant = class {
-    constructor(options = {}) {
-        this.recognition = WebVoiceAssistant.SpeechRecognition
-            ? WebVoiceAssistant.SpeechRecognition.setup({
-                language: options.language || 'en-US',
-                onResult: (text) => this.processcommand(text)
-            })
-            : null;
-        this.speak = WebVoiceAssistant.speak
-            ? WebVoiceAssistant.speak
-            : function () { };
-        this._userCommand = "";
-        this.ui = new WebVoiceAssistant.UIManager(options, this.speak, this.startListening, this.stopListening, () => this.listening, () => this.userCommand);
-        this.listening = false;
-        this.context = WebVoiceAssistant.extractPageContext();
+            updateCancelBtnStatus(shouldShow) {
+                this.isCancelBtnVisible = shouldShow;
+                this.cancelSpeechBtn.style.display = shouldShow ? "block" : "none";
+            }
 
-        this.aiConfig = {
-            geminiApiKey: options.geminiApiKey || (typeof window !== 'undefined' ? window.__WEBVOICEASSISTANT_CONFIG__?.geminiApiKey : undefined),
-            model: options.model || 'gemini-1.5-flash', // Default Gemini model
-            maxTokens: options.maxTokens || 200,
-            temperature: options.temperature || 0.7,
-            ...options.aiConfig
-        }
+            updateUI(state) {
+                this.recordBtn.className = 'wva-record-button';
 
-        // Rate limiting configuration
-        this.rateLimitConfig = {
-            maxRetries: 3,
-            baseDelay: 1000, // 1 second
-            maxDelay: 30000, // 30 seconds
-            ...options.rateLimitConfig
+                if (state.isListening) {
+                    this.recordBtn.classList.add('listening');
+                    this.updateStatus('Listening...', 'listening');
+                } else if (state.isProcessing) {
+                    this.button.classList.add('processing');
+                    this.updateStatus('Processing...', 'processing');
+                } else if (state.isReady) {
+                    this.updateStatus('Asistant Responded', "ready");
+                }
+            }
         };
 
-        if (this.aiConfig.geminiApiKey) {
-            this.gemini = this.createGeminiClient();
-        }
+        // Export for Node.js
+    })();
 
-        if (!this.recognition) {
-            alert("Speech recognition is not supported in this browser.");
-        }
-    }
+    // Main class - assign to namespace instead of class declaration
+    (function () {
+        WebVoiceAssistant.WebVoiceAssistant = class {
+            constructor(options = {}) {
 
-    get userCommand() {
-        return this._userCommand;
-    }
-
-    // Helper function for exponential backoff delay
-    sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // Calculate delay with exponential backoff
-    calculateDelay = (attempt) => {
-        const delay = this.rateLimitConfig.baseDelay * Math.pow(2, attempt);
-        return Math.min(delay, this.rateLimitConfig.maxDelay);
-    };
-
-    createGeminiClient = () => {
-        return {
-            generateContent: async (params) => {
-                let lastError;
-
-                for (let attempt = 0; attempt <= this.rateLimitConfig.maxRetries; attempt++) {
-                    try {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.aiConfig.model}:generateContent?key=${this.aiConfig.geminiApiKey}`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                contents: params.contents,
-                                generationConfig: {
-                                    temperature: params.temperature || this.aiConfig.temperature,
-                                    maxOutputTokens: params.maxOutputTokens || this.aiConfig.maxTokens,
-                                    topP: 0.8,
-                                    topK: 10
-                                },
-                                safetySettings: [
-                                    {
-                                        category: "HARM_CATEGORY_HARASSMENT",
-                                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                                    },
-                                    {
-                                        category: "HARM_CATEGORY_HATE_SPEECH",
-                                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                                    },
-                                    {
-                                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                                    },
-                                    {
-                                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                                        threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                                    }
-                                ]
-                            })
-                        });
-
-                        if (response.ok) {
-                            return await response.json();
-                        }
-
-                        // Handle rate limiting (429) and server errors (5xx)
-                        if (response.status === 429 || response.status >= 500) {
-                            lastError = new Error(`Gemini API error: ${response.status} - ${response.statusText}`);
-
-                            if (attempt < this.rateLimitConfig.maxRetries) {
-                                const delay = this.calculateDelay(attempt);
-                                console.log(`Rate limited. Retrying in ${delay}ms... (attempt ${attempt + 1}/${this.rateLimitConfig.maxRetries})`);
-                                await this.sleep(delay);
-                                continue;
-                            }
-                        } else {
-                            // For other errors (401, 400, etc.), don't retry
-                            const errorData = await response.json().catch(() => ({}));
-                            throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
-                        }
-                    } catch (error) {
-                        lastError = error;
-
-                        // Only retry on network errors or rate limiting
-                        if (attempt < this.rateLimitConfig.maxRetries &&
-                            (error.message.includes('429') || error.name === 'TypeError')) {
-                            const delay = this.calculateDelay(attempt);
-                            console.log(`Request failed. Retrying in ${delay}ms... (attempt ${attempt + 1}/${this.rateLimitConfig.maxRetries})`);
-                            await this.sleep(delay);
-                            continue;
-                        } else {
-                            break;
-                        }
-                    }
+                this.speechConfig = {
+                    language: options.language || 'en-US',
+                    rate: options.rate || 0.9
                 }
 
-                throw lastError;
-            }
-        }
-    }
+                this.recognition = WebVoiceAssistant.SpeechRecognition
+                    ? WebVoiceAssistant.SpeechRecognition.setup({
+                        language: this.speechConfig.language || 'en-US',
+                        onResult: (text) => this.processcommand(text)
+                    })
+                    : null;
 
-    generateAiResponse = async (command, Context) => {
-        if (!this.gemini) {
-            return "Please provide a Gemini API key to enable AI responses."
-        }
+                this.speak = WebVoiceAssistant.speak
+                    ? WebVoiceAssistant.speak
+                    : function () { };
 
-        try {
-            const response = await this.gemini.generateContent({
-                contents: [
-                    {
-                        role: 'user',
-                        parts: [
-                            {
-                                text: `You are a helpful voice assistant. Current page context: ${Context}\n\nUser command: ${command}`
-                            }
-                        ]
-                    }
-                ],
-                temperature: this.aiConfig.temperature,
-                maxOutputTokens: this.aiConfig.maxTokens
-            });
+                this.cancelSpeak = WebVoiceAssistant.cancelSpeak ? WebVoiceAssistant.cancelSpeak : function () { };
+                this._userCommand = "";
+                this.ui = new WebVoiceAssistant.UIManager(options, this.speak, this.startListening, this.stopListening, () => this.listening, () => this.userCommand, this.cancelSpeak, this.speechConfig);
+                this.listening = false;
+                this.context = WebVoiceAssistant.extractPageContext();
 
-            // Extract text from Gemini response
-            if (response.candidates && response.candidates[0] && response.candidates[0].content) {
-                const parts = response.candidates[0].content.parts;
-                if (parts && parts[0] && parts[0].text) {
-                    return parts[0].text;
+
+                this.aiConfig = {
+                    geminiApiKey: options.geminiApiKey || (typeof window !== 'undefined' ? window.__WEBVOICEASSISTANT_CONFIG__?.geminiApiKey : undefined),
+                    model: options.model || 'gemini-1.5-flash',
+                    maxTokens: options.maxTokens || 200,
+                    temperature: options.temperature || 0.7,
+                    ...options.aiConfig
+                }
+
+                if (!this.recognition) {
+                    alert("Speech recognition is not supported in this browser.");
                 }
             }
 
-            return "I received an empty response. Please try again.";
+            get userCommand() {
+                return this._userCommand;
+            }
 
-        } catch (error) {
-            console.error('Gemini Error:', error);
+            generateAiResponse = async (command, Context) => {
+                if (!this.aiConfig.geminiApiKey) {
+                    return "Please provide a Gemini API key to enable AI responses."
+                }
 
-            // Provide more specific error messages
-            if (error.message.includes('429')) {
-                return "Sorry, I'm receiving too many requests right now. Please try again in a moment.";
-            } else if (error.message.includes('401') || error.message.includes('403')) {
-                return "API key authentication failed. Please check your Gemini API key.";
-            } else if (error.message.includes('400')) {
-                return "Invalid request format. Please try rephrasing your command.";
-            } else if (error.message.includes('SAFETY')) {
-                return "I can't process that request due to safety guidelines. Please try a different command.";
-            } else {
-                return "I encountered an error processing your request. Please try again.";
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.aiConfig.model}:generateContent?key=${this.aiConfig.geminiApiKey}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    role: 'user',
+                                    parts: [
+                                        {
+                                            text: `You are a helpful voice assistant. Current page context: ${Context}\n\nUser command: ${command}, also please dont include this ** in response`
+                                        }
+                                    ]
+                                }
+                            ],
+                            generationConfig: {
+                                temperature: this.aiConfig.temperature,
+                                maxOutputTokens: this.aiConfig.maxTokens
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Gemini API error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    // Extract text from Gemini response
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                        const parts = data.candidates[0].content.parts;
+                        if (parts && parts[0] && parts[0].text) {
+                            return parts[0].text;
+                        }
+                    }
+
+                    return "I received an empty response. Please try again.";
+
+                } catch (error) {
+                    console.error('Gemini Error:', error);
+                    return "I encountered an error processing your request. Please try again.";
+                }
+            }
+
+            startListening = () => {
+                if (this.recognition) {
+                    this.listening = true;
+                    this._userCommand = "";
+                    this.recognition.start();
+                    console.log("started")
+                }
+            }
+
+            stopListening = () => {
+                if (this.recognition) {
+                    this.listening = false
+                    this.recognition.stop()
+                    console.log("stopped")
+                }
+
+            }
+
+            processcommand = async (text) => {
+                console.log("You said this:", text);
+                this._userCommand = text;
+                this.ui.setCommand(text);
+                this.ui.addMessage(text, "user");
+
+                const context = WebVoiceAssistant.extractPageContext
+                    ? WebVoiceAssistant.extractPageContext()
+                    : "";
+
+                const value = await this.generateAiResponse(text, context)
+                if (value) {
+                    this.ui.updateUI({ isReady: true })
+                    this.ui.addMessage(value, "assistant")
+                    this.speak(value, { language: this.speechConfig.language, rate: this.speechConfig.rate }).then((status) => {
+                        if (status === false) {
+                            this.ui.updateCancelBtnStatus(status)
+                        }
+                    })
+                    this.ui.updateCancelBtnStatus(true)
+                }
             }
         }
-    }
-
-    startListening = () => {
-        if (this.recognition) {
-            this.listening = true;
-            this._userCommand = "";
-            this.recognition.start();
-            console.log("started")
-        }
-    }
-
-    stopListening = () => {
-        if (this.recognition) {
-            this.listening = false
-            this.recognition.stop()
-            console.log("stopped")
-        }
-    }
-
-    processcommand = async (text) => {
-        console.log("You said this:", text);
-        this._userCommand = text;
-        this.ui.setCommand(text);
-        this.ui.addMessage(text, "user");
-
-        const context = WebVoiceAssistant.extractPageContext
-            ? WebVoiceAssistant.extractPageContext()
-            : "";
-
-        const value = await this.generateAiResponse(text, context)
-        if (value) {
-            this.ui.updateUI({ isReady: true })
-            this.ui.addMessage(value, "assistant")
-            this.speak(value)
-        }
-
-    }
-}
 
 
     })();
-    
+
     // Export to window if available
     if (typeof window !== 'undefined') {
         window.WebVoiceAssistant = WebVoiceAssistant.WebVoiceAssistant;

@@ -24,6 +24,8 @@ const bundle = `(function() {
             .replace(/if \(typeof exports !== "undefined"\) {[^}]+}/g, '')
             // Fix function assignments to WebVoiceAssistant namespace
             .replace(/function speak\(/g, 'WebVoiceAssistant.speak = function(')
+            //
+            .replace(/function cancelSpeak\(/g, 'WebVoiceAssistant.cancelSpeak = function(')
             // Fix class assignments
             .replace(/class (\w+)/g, 'WebVoiceAssistant.$1 = class')
             // Remove extra closing braces and semicolons
