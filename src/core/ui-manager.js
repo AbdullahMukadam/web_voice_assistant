@@ -1,6 +1,5 @@
 WebVoiceAssistant.UIManager = class {
     constructor(config, speak, startListening, stopListening, isListening, getCommand, cancelSpeak, speechConfig) {
-        this.config = config || {};
         this.assistant = {};
         this.messages = [];
         this.speak = speak;
@@ -12,13 +11,17 @@ WebVoiceAssistant.UIManager = class {
         this.cancelSpeak = cancelSpeak;
         this.speechConfig = speechConfig || {};
 
-        
+
         this.config = {
-            position: 'bottom-right',
-            buttonSize: 60,
-            panelWidth: 350,
-            panelHeight: 450,
-            ...this.config
+            ButtonBackGroundColour: config.ButtonBackGroundColour || "black",
+            svgColor: config.svgColor || "white",
+            textColor: config.textColor || "white",
+            position: config.position || 'bottom-right',
+            buttonSize: config.buttonSize || 60,
+            panelWidth: config.panelWidth || 350,
+            panelHeight: config.panelHeight || 450,
+            PanelBackgroundColor: config.PanelBackgroundColor || "rgb(24 24 27)",
+            MessagesBackgroundColor: config.MessagesBackgroundColor || "rgb(24 24 27)"
         };
 
         this.injectStyles();
@@ -57,7 +60,7 @@ WebVoiceAssistant.UIManager = class {
                 justify-content: center;
                 transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: ${this.config.ButtonBackGroundColour};
                 box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3),
                            0 4px 16px rgba(118, 75, 162, 0.2),
                            inset 0 1px 2px rgba(255, 255, 255, 0.1);
@@ -72,7 +75,7 @@ WebVoiceAssistant.UIManager = class {
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+               
                 transform: rotate(-45deg);
                 transition: all 0.6s;
                 opacity: 0;
@@ -94,7 +97,7 @@ WebVoiceAssistant.UIManager = class {
                 justify-content: center;
                 transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 position: relative;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: black;
                 box-shadow: 0 6px 24px rgba(102, 126, 234, 0.25),
                            0 3px 12px rgba(118, 75, 162, 0.15),
                            inset 0 1px 2px rgba(255, 255, 255, 0.1);
@@ -109,7 +112,6 @@ WebVoiceAssistant.UIManager = class {
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
                 transform: rotate(-45deg);
                 transition: all 0.6s;
                 opacity: 0;
@@ -121,7 +123,7 @@ WebVoiceAssistant.UIManager = class {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: linear-gradient(180deg, #495287 0%, #12131a 100%);
+                background: ${this.config.PanelBackgroundColor};
                 border-top: 1px solid rgba(102, 126, 234, 0.1);
             }
 
@@ -169,12 +171,78 @@ WebVoiceAssistant.UIManager = class {
                 filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             }
 
+            .overlay-chat-panel{
+             height: ${this.config.panelHeight}px;
+             width: ${this.config.panelWidth}px;
+             position: absolute;
+             background-color:#edebe4;
+             display:none;
+             z-index:49;
+             opacity: 0;
+             transform: scale(0.95) translateY(-10px);
+             transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .overlay-content-container{
+             height: 100%;
+             width: 100%;
+             display:flex;
+             flex-direction: column;
+             justify-content:space-between;
+             align-items:center;
+            }
+
+            .command{
+             height: 50%;
+             width: 100%;
+             display:flex;
+             justify-content:center;
+             align-items:center;
+            }
+
+            .gif{
+             width: 100%;
+             height:50%;
+             display:flex;
+              align-items: end;
+             justify-content:center;
+            }
+
+            .overlay-gif{
+             height: 40px;
+             width: 40px;
+             z-index:60;
+             
+            }
+
+            .command-text {
+              font-weight: 600;
+              font-size: 18px;
+              letter-spacing: 0.5px;
+              opacity: 1;
+              color:black;
+            }
+
+            .command-text.fade-in {
+                opacity: 0;
+                animation: fadeIn 2s ease-in-out forwards;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
             /* Chat panel */
             .wva-chat-panel {
                 position: absolute;
                 width: ${this.config.panelWidth}px;
                 height: ${this.config.panelHeight}px;
-                background: rgba(255, 255, 255, 0.95);
+                background: ${this.config.PanelBackgroundColor};
                 backdrop-filter: blur(20px);
                 border-radius: 20px;
                 box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12),
@@ -185,7 +253,7 @@ WebVoiceAssistant.UIManager = class {
                 flex-direction: column;
                 overflow: hidden;
                 bottom: ${this.config.buttonSize + 15}px;
-                right: 0;
+                ${this.config.position === "bottom-left" ? "left: 0;" : "right:0;"}
                 border: 1px solid rgba(255, 255, 255, 0.2);
             }
 
@@ -197,25 +265,14 @@ WebVoiceAssistant.UIManager = class {
             /* Chat header */
             .wva-chat-header {
                 padding: 20px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                color: white;
+                background:  ${this.config.PanelBackgroundColor};
+                color: ${this.config.textColor};
                 font-weight: 600;
                 position: relative;
                 font-size: 16px;
                 letter-spacing: 0.5px;
-                box-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
             }
             
-            .wva-chat-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-                pointer-events: none;
-            }
 
             .wva-close-btn {
                 position: absolute;
@@ -226,7 +283,7 @@ WebVoiceAssistant.UIManager = class {
                 border-radius: 50%;
                 width: 32px;
                 height: 32px;
-                color: white;
+                color: ${this.config.textColor};
                 cursor: pointer;
                 font-size: 16px;
                 display: flex;
@@ -250,7 +307,7 @@ WebVoiceAssistant.UIManager = class {
                 display: flex;
                 flex-direction: column;
                 gap: 16px;
-                background: linear-gradient(135deg, #fafbff 0%, #f5f7ff 100%);
+                background: ${this.config.MessagesBackgroundColor};
             }
             
             .wva-messages::-webkit-scrollbar {
@@ -279,14 +336,14 @@ WebVoiceAssistant.UIManager = class {
                 animation: wva-messageSlide 0.3s ease-out;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
                 backdrop-filter: blur(10px);
+                background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
             }
 
             .wva-message.user {
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background:  rgb(9 9 11);
                 color: white;
                 align-self: flex-end;
                 border-bottom-right-radius: 6px;
-                box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
             }
             
             .wva-message.user::before {
@@ -302,11 +359,11 @@ WebVoiceAssistant.UIManager = class {
             }
 
             .wva-message.assistant {
-                background: rgba(255, 255, 255, 0.8);
-                color: #2d3748;
+                background: rgba(45, 55, 72, 0.8);
+                border: 1px solid rgba(102, 126, 234, 0.2);
+                color: #e2e8f0;
                 align-self: flex-start;
                 border-bottom-left-radius: 6px;
-                border: 1px solid rgba(102, 126, 234, 0.1);
                 box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             }
 
@@ -318,7 +375,7 @@ WebVoiceAssistant.UIManager = class {
                 justify-content: space-between;
                 padding: 16px 20px;
                 border-top: 1px solid rgba(102, 126, 234, 0.1);
-                background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+                background:  ${this.config.PanelBackgroundColor};
                 gap: 12px;
             }
 
@@ -339,15 +396,15 @@ WebVoiceAssistant.UIManager = class {
                 left: 0;
                 width: 40px;
                 height: 2px;
-                background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
             }
 
             /* Cancel Speech Button */
             .cancel-speech-btn {
                 padding: 8px 16px;
                 border: 1px solid rgba(102, 126, 234, 0.2);
+                border-color: rgba(102, 126, 234, 0.3);
                 border-radius: 12px;
-                background: rgba(255, 255, 255, 0.8);
+                background: rgba(102, 126, 234, 0.1);
                 color: #667eea;
                 font-size: 12px;
                 font-weight: 500;
@@ -359,12 +416,6 @@ WebVoiceAssistant.UIManager = class {
                 display: none;
             }
             
-            .cancel-speech-btn:hover {
-                background: rgba(102, 126, 234, 0.1);
-                border-color: rgba(102, 126, 234, 0.3);
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-            }
             
             .cancel-speech-btn:active {
                 transform: translateY(0);
@@ -372,33 +423,23 @@ WebVoiceAssistant.UIManager = class {
             }
 
             .wva-status.listening {
-                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+               
                 color: #e53e3e;
                 animation: wva-statusPulse 2s infinite;
             }
 
             .wva-status.processing {
-                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
+               
                 color: #d69e2e;
                 animation: wva-statusWave 1.5s infinite;
             }
 
             .wva-status.ready {
-                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+                
                 color: #38a169;
             }
             
-            .wva-actions-container.listening {
-                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
-            }
-
-            .wva-actions-container.processing {
-                background: linear-gradient(135deg, #fffbeb 0%, #fef5e7 100%);
-            }
-
-            .wva-actions-container.ready {
-                background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
-            }
+           
 
             /* Enhanced Animations */
             @keyframes wva-pulse {
@@ -480,93 +521,67 @@ WebVoiceAssistant.UIManager = class {
                 }
             }
             
-            /* Dark mode support */
-            @media (prefers-color-scheme: dark) {
-                .wva-chat-panel {
-                    background: rgba(26, 32, 44, 0.95);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                }
-                
-                .wva-messages {
-                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-                }
-                
-                .wva-message.assistant {
-                    background: rgba(45, 55, 72, 0.8);
-                    color: #e2e8f0;
-                    border: 1px solid rgba(102, 126, 234, 0.2);
-                }
-                
-                .wva-status {
-                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-                    color: #a0aec0;
-                }
-                
-                .wva-actions-container {
-                    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-                }
-                
-                .cancel-speech-btn {
-                    background: rgba(102, 126, 234, 0.1);
-                    border: 1px solid rgba(102, 126, 234, 0.3);
-                    color: #90cdf4;
-                }
-                
-                .cancel-speech-btn:hover {
-                    background: rgba(102, 126, 234, 0.2);
-                    border-color: rgba(102, 126, 234, 0.4);
-                }
-            }
+           
         `;
         document.head.appendChild(style);
     }
 
     createUI() {
-        
+
         this.container = document.createElement('div');
         this.container.className = `wva-container wva-position-${this.config.position}`;
 
-        
+
         this.button = document.createElement('button');
         this.button.className = 'wva-button';
         this.button.title = 'Start voice interaction';
         this.button.innerHTML = `
-           <svg class="wva-icon" viewBox="0 0 24 24">
+          <svg class="wva-icon" viewBox="0 0 24 24">
   <!-- Robot head (main body) -->
-  <rect x="6" y="7" width="12" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+  <rect x="6" y="7" width="12" height="10" rx="2" ry="2" fill="none" stroke="${this.config.svgColor}" stroke-width="2"/>
   
   <!-- Antenna -->
-  <line x1="12" y1="3" x2="12" y2="7" stroke="currentColor" stroke-width="2"/>
-  <circle cx="12" cy="3" r="1" fill="currentColor"/>
+  <line x1="12" y1="3" x2="12" y2="7" stroke="${this.config.svgColor}" stroke-width="2"/>
+  <circle cx="12" cy="3" r="1" fill="${this.config.svgColor}"/>
   
   <!-- Eyes -->
-  <circle cx="9.5" cy="11" r="1.5" fill="currentColor"/>
-  <circle cx="14.5" cy="11" r="1.5" fill="currentColor"/>
+  <circle cx="9.5" cy="11" r="1.5" fill="${this.config.svgColor}"/>
+  <circle cx="14.5" cy="11" r="1.5" fill="${this.config.svgColor}"/>
   
   <!-- Mouth/speaker grille -->
-  <rect x="8" y="14" width="8" height="2" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="8" y="14" width="8" height="2" rx="1" fill="none" stroke="${this.config.svgColor}" stroke-width="1.5"/>
+  <line x1="9" y1="15" x2="15" y2="15" stroke="${this.config.svgColor}" stroke-width="0.5"/>
   
   <!-- Side panels/ears -->
-  <rect x="4" y="9" width="2" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <rect x="18" y="9" width="2" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <rect x="4" y="9" width="2" height="4" rx="1" fill="none" stroke="${this.config.svgColor}" stroke-width="1.5"/>
+  <rect x="18" y="9" width="2" height="4" rx="1" fill="none" stroke="${this.config.svgColor}" stroke-width="1.5"/>
   
   <!-- Neck connector -->
-  <rect x="10.5" y="17" width="3" height="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <rect x="10.5" y="17" width="3" height="2" fill="none" stroke="${this.config.svgColor}" stroke-width="1.5"/>
 </svg>
         `;
 
-       
+
         this.chatPanel = document.createElement('div');
         this.chatPanel.className = 'wva-chat-panel';
         this.chatPanel.innerHTML = `
+           <div class="overlay-chat-panel">
+            <div class="overlay-content-container">
+             <div class="command">
+             <p class="command-text"></p>
+            </div>
+            <div class="gif"> 
+              <img src="https://res.cloudinary.com/dhbs6k3ue/image/upload/v1749451460/Animation_-_1749447088333_pxxbio.gif" alt="gif" />
+            </div>
+            </div>
+           </div>
             <div class="wva-chat-header">
                 Voice Assistant
                 <button class="wva-close-btn" title="Close chat">×</button>
             </div>
             <div class="wva-messages"></div>
             <div class="wva-actions-container">
-                <div class="wva-status">Ready</div>
+                <div class="wva-status"></div>
                 <button class="cancel-speech-btn">Cancel Speech</button>
             </div>
             <div class="btn-container">
@@ -579,29 +594,33 @@ WebVoiceAssistant.UIManager = class {
            
         `;
 
-        
+
         this.messagesEl = this.chatPanel.querySelector('.wva-messages');
         this.statusEl = this.chatPanel.querySelector('.wva-status');
         this.closeBtn = this.chatPanel.querySelector('.wva-close-btn');
         this.recordBtn = this.chatPanel.querySelector(".wva-record-button")
         this.cancelSpeechBtn = this.chatPanel.querySelector(".cancel-speech-btn");
-        this.actionsContainer = this.chatPanel.querySelector(".wva-actions-container")
+        this.actionsContainer = this.chatPanel.querySelector(".wva-actions-container");
+        this.chatPanelOverlay = this.chatPanel.querySelector(".overlay-chat-panel");
+        this.commandtext = this.chatPanel.querySelector(".command-text");
 
-       
+
         this.container.appendChild(this.button);
         this.container.appendChild(this.chatPanel);
         document.body.appendChild(this.container);
 
-        
+
         this.addMessage('Hello! How can I help you today?', 'assistant');
     }
 
     bindEvents() {
         this.recordBtn.addEventListener('click', () => {
-            if (this.isListening()) {
-                this.stopListening()
-                this.updateUI({ isProcessing: true })
-            } else {
+            if (!this.isListening()) {
+                this.chatPanelOverlay.style.display = "block"
+                requestAnimationFrame(() => {
+                    this.chatPanelOverlay.style.opacity = "1";
+                    this.chatPanelOverlay.style.transform = "scale(1) translateY(0)";
+                })
                 this.startListening()
                 this.updateUI({ isListening: true })
             }
@@ -616,7 +635,7 @@ WebVoiceAssistant.UIManager = class {
             console.log('Speech cancelled');
         });
 
-        
+
         this.button.addEventListener('click', () => {
             this.toggleChat()
             this.updateCancelBtnStatus(true)
@@ -650,7 +669,18 @@ WebVoiceAssistant.UIManager = class {
 
     setCommand(text) {
         this.userCommand = text;
-        console.log(this.userCommand, " < this is what you said")
+        this.commandtext.textContent = text;
+        this.commandtext.classList.add("fade-in")
+        setTimeout(() => {
+            this.chatPanelOverlay.style.opacity = "0";
+            this.chatPanelOverlay.style.transform = "scale(0.95) translateY(-10px)";
+            this.chatPanelOverlay.style.display = "none";
+            this.commandtext.textContent = "";
+            this.stopListening();
+            this.updateUI({ isProcessing: true });
+
+        }, 2000)
+        //console.log(this.userCommand, " < this is what you said")
     }
 
     updateCancelBtnStatus(shouldShow) {
@@ -661,7 +691,6 @@ WebVoiceAssistant.UIManager = class {
     updateUI(state) {
         this.recordBtn.className = 'wva-record-button';
         if (state.isListening) {
-            this.recordBtn.classList.add('listening');
             this.updateStatus('Listening...', 'listening');
         } else if (state.isProcessing) {
             this.button.classList.add('processing');

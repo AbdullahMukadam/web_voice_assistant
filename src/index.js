@@ -6,6 +6,11 @@ class WebVoiceAssistant {
             rate: options.rate || 0.9
         }
 
+        this.contextConfig = {
+            contextSize: options.contextSize || 5000
+        }
+
+
         this.recognition = WebVoiceAssistant.SpeechRecognition
             ? WebVoiceAssistant.SpeechRecognition.setup({
                 language: this.speechConfig.language || 'en-US',
@@ -33,7 +38,6 @@ class WebVoiceAssistant {
             model: options.model || 'gemini-1.5-flash',
             maxTokens: options.maxTokens || 200,
             temperature: options.temperature || 0.7,
-            ...options.aiConfig
         }
 
         if (!this.recognition) {
@@ -80,7 +84,7 @@ class WebVoiceAssistant {
 
             const data = await response.json();
 
-           
+
             if (data.candidates && data.candidates[0] && data.candidates[0].content) {
                 const parts = data.candidates[0].content.parts;
                 if (parts && parts[0] && parts[0].text) {
@@ -100,7 +104,7 @@ class WebVoiceAssistant {
         if (this.recognition) {
             this.listening = true;
             this._userCommand = "";
-            this.recognition.start();          
+            this.recognition.start();
         }
     }
 
@@ -118,19 +122,21 @@ class WebVoiceAssistant {
         this.ui.addMessage(text, "user");
 
         const context = WebVoiceAssistant.extractPageContext
-            ? WebVoiceAssistant.extractPageContext(options.contextSize || 5000)
+            ? WebVoiceAssistant.extractPageContext(this.contextConfig.contextSize || 5000)
             : "";
 
         const value = await this.generateAiResponse(text, context)
         if (value) {
-            this.ui.updateUI({ isReady: true })
-            this.ui.addMessage(value, "assistant")
-            this.speak(value, { language: this.speechConfig.language, rate: this.speechConfig.rate }).then((status) => {
-                if (status === false) {
-                    this.ui.updateCancelBtnStatus(status)
-                }
-            })
-            this.ui.updateCancelBtnStatus(true)
+            setTimeout(() => {
+                this.ui.updateUI({ isReady: true })
+                this.ui.addMessage(value, "assistant")
+                this.speak(value, { language: this.speechConfig.language, rate: this.speechConfig.rate }).then((status) => {
+                    if (status === false) {
+                        this.ui.updateCancelBtnStatus(status)
+                    }
+                })
+                this.ui.updateCancelBtnStatus(true)
+            }, 1500)
         }
     }
 }
