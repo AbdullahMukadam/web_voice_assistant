@@ -1,29 +1,29 @@
 {
-  "name": "web-voice-assistant",
+  "name": "speak-bich",
   "version": "1.0.6",
   "description": "A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.",
-  "main": "dist/web-voice-assistant.cjs.js",
-  "module": "dist/web-voice-assistant.esm.js",
-  "browser": "dist/web-voice-assistant.min.js",
+  "main": "dist/speak-bich.cjs.js",
+  "module": "dist/speak-bich.esm.js",
+  "browser": "dist/speak-bich.min.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/*"
   ],
   "exports": {
     ".": {
-      "require": "./dist/web-voice-assistant.cjs.js",
-      "import": "./dist/web-voice-assistant.esm.js",
-      "browser": "./dist/web-voice-assistant.min.js"
+      "require": "./dist/speak-bich.cjs.js",
+      "import": "./dist/speak-bich.esm.js",
+      "browser": "./dist/speak-bich.min.js"
     }
   },
-  "unpkg": "dist/web-voice-assistant.min.js",
-  "jsdelivr": "dist/web-voice-assistant.min.js",
+  "unpkg": "dist/speak-bich.min.js",
+  "jsdelivr": "dist/speak-bich.min.js",
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:types",
     "build:cjs": "node build.js --format=cjs",
     "build:esm": "node build.js --format=esm",
     "build:browser": "node build.js --format=umd && npm run minify",
-    "minify": "terser dist/web-voice-assistant.umd.js -o dist/web-voice-assistant.min.js --source-map",
+    "minify": "terser dist/speak-bich.umd.js -o dist/speak-bich.min.js --source-map",
     "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --outDir dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -37,7 +37,10 @@
     "ai-assistant",
     "javascript",
     "browser",
-    "accessibility"
+    "accessibility",
+    "speak-bich",
+    "voice-ai",
+    "conversational-ai"
   ],
   "author": "Abdullah Mukadam <abdullahmukadam21@gmail.com>",
   "license": "MIT",

@@ -39,7 +39,7 @@ const mainBundle = `(function() {
 })();`;
 
 // 6. Combine bundles
-const fullBundle = `// WebVoiceAssistant v${require('./package.json').version}
+const fullBundle = `// speak-bich v${require('./package.json').version}
 var WebVoiceAssistant = {};
 
 ${coreBundle}
@@ -66,7 +66,7 @@ const BrowserWebVoiceAssistant = (function() {
 })();
 
 const SSRAssistant = function() {
-    console.warn('WebVoiceAssistant: Running in SSR mode - functionality disabled');
+    console.warn('speak-bich: Running in SSR mode - functionality disabled');
     return {
         destroy: ()=> {},
         startListening: () => {},
@@ -95,9 +95,9 @@ export default typeof window !== 'undefined' ? BrowserWebVoiceAssistant : SSRAss
 if (!fs.existsSync("./dist")) fs.mkdirSync("./dist");
 
 // 9. Write the appropriate bundle
-const outputFile = format === 'cjs' ? 'web-voice-assistant.cjs.js' :
-    format === 'esm' ? 'web-voice-assistant.esm.js' :
-        'web-voice-assistant.umd.js';
+const outputFile = format === 'cjs' ? 'speak-bich.cjs.js' :
+    format === 'esm' ? 'speak-bich.esm.js' :
+        'speak-bich.umd.js';
 
 fs.writeFileSync(`./dist/${outputFile}`, wrappers[format]);
 

@@ -1,14 +1,6 @@
-// UMD
-(function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.WebVoiceAssistant = factory();
-    }
-}(typeof self !== 'undefined' ? self : this, function() {
-    // WebVoiceAssistant v1.0.5
+// CommonJS
+(function() {
+    // speak-bich v1.0.6
 var WebVoiceAssistant = {};
 
 (function() {
@@ -959,6 +951,26 @@ if (typeof module !== 'undefined' && module.exports) {
 
     }
 
+    destroy = () => {
+        if (this.recognition) {
+            this.stopListening();
+
+            if (this.recognition.abort) {
+                this.recognition.abort();
+            }
+
+            this.recognition.onresult = null;
+            this.recognition.onerror = null;
+            this.recognition = null;
+        }
+
+        this.speak = null;
+        this.cancelSpeak = null;
+        this.ui = null;
+        this._userCommand = null;
+        this.context = null;
+    }
+
     processcommand = async (text) => {
         this._userCommand = text;
         this.ui.setCommand(text);
@@ -993,5 +1005,5 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
     window.WebVoiceAssistant = WebVoiceAssistant.WebVoiceAssistant;
 }
-    return WebVoiceAssistant.WebVoiceAssistant;
-}));
+    module.exports = WebVoiceAssistant.WebVoiceAssistant;
+})();

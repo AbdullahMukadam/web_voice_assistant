@@ -1,11 +1,11 @@
-# WebVoiceAssistant 🎙️
+# Speak-Bich 🎙️
 
-[![npm version](https://img.shields.io/npm/v/web-voice-assistant)](https://www.npmjs.com/package/web-voice-assistant)
+[![npm version](https://img.shields.io/npm/v/speak-bich)](https://www.npmjs.com/package/speak-bich)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Bundle Size](https://img.shields.io/bundlephobia/min/web-voice-assistant)](https://bundlephobia.com/package/web-voice-assistant)
-[![Downloads](https://img.shields.io/npm/dm/web-voice-assistant)](https://npm-stat.com/charts.html?package=web-voice-assistant)
+[![Bundle Size](https://img.shields.io/bundlephobia/min/speak-bich)](https://bundlephobia.com/package/speak-bich)
+[![Downloads](https://img.shields.io/npm/dm/speak-bich)](https://npm-stat.com/charts.html?package=speak-bich)
 
-A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.
+A lightweight voice assistant for web applications that has complete page context awareness with AI response capabilities using the Web Speech API.
 
 ## Features ✨
 
@@ -16,23 +16,24 @@ A lightweight voice assistant for web applications with AI response capabilities
 - ⚡ No dependencies
 - 🎨 Fully customizable UI
 - 🔌 Multiple integration options
+- ✔  Page Context Awareness
 
 ## Installation 📦
 
 ```bash
-npm install web-voice-assistant
+npm install speak-bich
 # or 
-yarn add web-voice-assistant
+yarn add speak-bich
 # or
-pnpm add web-voice-assistant
+pnpm add speak-bich
 ```
 
 For browser/CDN usage:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/web-voice-assistant@latest/dist/web-voice-assistant.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/speak-bich@latest/dist/speak-bich.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/web-voice-assistant"></script>
+<script src="https://unpkg.com/speak-bich"></script>
 ```
 
 ## Basic Usage
@@ -73,7 +74,7 @@ const assistant = new WebVoiceAssistant({
 
 ```jsx
 import { useEffect } from 'react';
-import WebVoiceAssistant from 'web-voice-assistant';
+import WebVoiceAssistant from 'speak-bich';
 
 function VoiceAssistant() {
   useEffect(() => {
@@ -82,7 +83,6 @@ function VoiceAssistant() {
       position: 'bottom-left',
       buttonSize: 70
     });
-    return () => assistant.destroy();
   }, []);
 
   return null;
@@ -94,7 +94,7 @@ function VoiceAssistant() {
 ```jsx
 'use client';
 import { useEffect } from 'react';
-import WebVoiceAssistant from 'web-voice-assistant';
+import WebVoiceAssistant from 'speak-bich';
 
 export default function VoiceAssistant() {
   useEffect(() => {
@@ -102,7 +102,6 @@ export default function VoiceAssistant() {
       geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_KEY,
       panelWidth: 400
     });
-    return () => assistant.destroy();
   }, []);
   
   return null;
