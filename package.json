@@ -1,6 +1,6 @@
 {
   "name": "web-voice-assistant",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.",
   "main": "dist/web-voice-assistant.cjs.js",
   "module": "dist/web-voice-assistant.esm.js",
