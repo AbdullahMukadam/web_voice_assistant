@@ -1,7 +1,7 @@
 {
   "name": "web-voice-assistant",
   "version": "1.0.2",
-  "description": "Voice assistant for web applications with AI integration",
+  "description": "A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.",
   "main": "dist/web-voice-assistant.js",
   "files": [
     "dist/*"
@@ -12,13 +12,22 @@
     "build": "node build.js"
   },
   "keywords": [
-    "voice",
-    "assistant",
-    "speech",
-    "AI",
-    "web",
-    "CDN"
+    "voice-assistant",
+    "speech-recognition",
+    "text-to-speech",
+    "web-speech-api",
+    "gemini-ai",
+    "voice-control",
+    "ai-assistant",
+    "javascript",
+    "browser",
+    "accessibility"
   ],
   "author": "Abdullah Mukadam abdullahmukadam21@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "homepage": "https://github.com/AbdullahMukadam/web_voice_assistant#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbdullahMukadam/web_voice_assistant.git"
+  }
 }
