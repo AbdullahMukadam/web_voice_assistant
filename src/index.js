@@ -13,7 +13,7 @@ class WebVoiceAssistant {
 
         this.recognition = WebVoiceAssistant.SpeechRecognition
             ? WebVoiceAssistant.SpeechRecognition.setup({
-                language: this.speechConfig.language || 'en-US',
+                language: this.speechConfig.language,
                 onResult: (text) => this.processcommand(text)
             })
             : null;

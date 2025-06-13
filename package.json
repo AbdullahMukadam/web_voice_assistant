@@ -1,21 +1,24 @@
 {
   "name": "web-voice-assistant",
   "version": "1.0.0",
+  "description": "Voice assistant for web applications with AI integration",
   "main": "dist/web-voice-assistant.js",
   "files": [
-    "dist"
+    "dist/*"
   ],
-  "type": "commonjs",
+  "unpkg": "dist/web-voice-assistant.js",
+  "jsdelivr": "dist/web-voice-assistant.js",
   "scripts": {
-    "build": "node build.js",
-    "prepublish": "npm run build"
+    "build": "node build.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "webpack": "^5.99.9",
-    "webpack-cli": "^6.0.1"
-  }
+  "keywords": [
+    "voice",
+    "assistant",
+    "speech",
+    "AI",
+    "web",
+    "CDN"
+  ],
+  "author": "Abdullah Mukadam abdullahmukadam21@gmail.com",
+  "license": "MIT"
 }

@@ -300,15 +300,38 @@ WebVoiceAssistant.cancelSpeak = function() {
              width: 100%;
              height:50%;
              display:flex;
-              align-items: end;
+             align-items: center;
              justify-content:center;
+             flex-direction:column;
+             gap:5px;
             }
 
-            .overlay-gif{
-             height: 40px;
-             width: 40px;
+            .gif img{
+             height: 180px;
+             width: 180px;
              z-index:60;
              
+            }
+
+            .gif p{
+             font-size:14px;
+             text-align:center;
+             color: red;
+             font-weight: 400;
+             animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+             0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            	40% {
+                transform: translateY(-15px);
+              }
+            	60% {
+                transform: translateY(-8px);
+              }
             }
 
             .command-text {
@@ -667,7 +690,8 @@ WebVoiceAssistant.cancelSpeak = function() {
              <p class="command-text"></p>
             </div>
             <div class="gif"> 
-              <img src="https://res.cloudinary.com/dhbs6k3ue/image/upload/v1749451460/Animation_-_1749447088333_pxxbio.gif" alt="gif" />
+            <p>Listening..</p>
+              <img src="https://res.cloudinary.com/dhbs6k3ue/image/upload/v1749807636/yy3_a3p4as.gif" alt="gif" />
             </div>
             </div>
            </div>
@@ -815,7 +839,7 @@ WebVoiceAssistant.cancelSpeak = function() {
 
         this.recognition = WebVoiceAssistant.SpeechRecognition
             ? WebVoiceAssistant.SpeechRecognition.setup({
-                language: this.speechConfig.language || 'en-US',
+                language: this.speechConfig.language,
                 onResult: (text) => this.processcommand(text)
             })
             : null;
