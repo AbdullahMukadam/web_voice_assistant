@@ -1,15 +1,32 @@
 {
   "name": "web-voice-assistant",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.",
-  "main": "dist/web-voice-assistant.js",
+  "main": "dist/web-voice-assistant.cjs.js",
+  "module": "dist/web-voice-assistant.esm.js",
+  "browser": "dist/web-voice-assistant.min.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/*"
   ],
-  "unpkg": "dist/web-voice-assistant.js",
-  "jsdelivr": "dist/web-voice-assistant.js",
+  "exports": {
+    ".": {
+      "require": "./dist/web-voice-assistant.cjs.js",
+      "import": "./dist/web-voice-assistant.esm.js",
+      "browser": "./dist/web-voice-assistant.min.js"
+    }
+  },
+  "unpkg": "dist/web-voice-assistant.min.js",
+  "jsdelivr": "dist/web-voice-assistant.min.js",
   "scripts": {
-    "build": "node build.js"
+    "build": "npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:types",
+    "build:cjs": "node build.js --format=cjs",
+    "build:esm": "node build.js --format=esm",
+    "build:browser": "node build.js --format=umd && npm run minify",
+    "minify": "terser dist/web-voice-assistant.umd.js -o dist/web-voice-assistant.min.js --source-map",
+    "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --outDir dist",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "voice-assistant",
@@ -23,11 +40,21 @@
     "browser",
     "accessibility"
   ],
-  "author": "Abdullah Mukadam abdullahmukadam21@gmail.com",
+  "author": "Abdullah Mukadam <abdullahmukadam21@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/AbdullahMukadam/web_voice_assistant#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AbdullahMukadam/web_voice_assistant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AbdullahMukadam/web_voice_assistant/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "terser": "^5.42.0",
+    "typescript": "^4.9.5"
   }
 }

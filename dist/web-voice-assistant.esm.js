@@ -1,12 +1,9 @@
+// ES Module
+// WebVoiceAssistant v1.0.4
+var WebVoiceAssistant = {};
+
 (function() {
-    // Use the global window object if available, otherwise fallback to a local object
-    var globalObj = (typeof window !== 'undefined') ? window : this;
-    globalObj.WebVoiceAssistant = globalObj.WebVoiceAssistant || {};
-    var WebVoiceAssistant = globalObj.WebVoiceAssistant;
-    
-    // Core modules - wrap each in IIFE to prevent collisions
-    (function() {
-            WebVoiceAssistant.extractPageContext = function(contextSize) {
+        WebVoiceAssistant.extractPageContext = function(contextSize) {
     const content = [];
 
 
@@ -47,11 +44,13 @@
     return content.join('\n').substring(0, contextSize || 5000);
 }
 
-
-        })();
+if (typeof exports !== "undefined") {
+    exports.extractPageContext = extractPageContext
+}
+    })();
 
 (function() {
-            WebVoiceAssistant.SpeechRecognition = {
+        WebVoiceAssistant.SpeechRecognition = {
     setup: function ({ language, onResult }) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) return null;
@@ -67,11 +66,13 @@
 };
 
 
-
-        })();
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = WebVoiceAssistant.SpeechRecognition;
+}
+    })();
 
 (function() {
-            const synthesis = window.speechSynthesis;
+        const synthesis = window.speechSynthesis;
 
 WebVoiceAssistant.speak = function(text, { language, rate } = {}) {
     return new Promise((resolve) => {
@@ -90,11 +91,14 @@ WebVoiceAssistant.cancelSpeak = function() {
     synthesis.cancel()
 }
 
-
-        })();
+if (typeof exports !== "undefined") {
+    exports.speak = speak
+    exports.cancelSpeak = cancelSpeak
+}
+    })();
 
 (function() {
-            WebVoiceAssistant.UIManager = class {
+        WebVoiceAssistant.UIManager = class {
     constructor(config, speak, startListening, stopListening, isListening, getCommand, cancelSpeak, speechConfig) {
         this.assistant = {};
         this.messages = [];
@@ -820,11 +824,15 @@ WebVoiceAssistant.cancelSpeak = function() {
         }
     }
 };
-        })();
-    
-    // Main class - assign to namespace instead of class declaration
-    (function() {
-        WebVoiceAssistant.WebVoiceAssistant = class {
+
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { UIManager: WebVoiceAssistant.UIManager };
+}
+    })();
+
+(function() {
+    WebVoiceAssistant.WebVoiceAssistant = class {
     constructor(options = {}) {
 
         this.speechConfig = {
@@ -967,11 +975,12 @@ WebVoiceAssistant.cancelSpeak = function() {
     }
 }
 
-
-    })();
-    
-    // Export to window if available
-    if (typeof window !== 'undefined') {
-        window.WebVoiceAssistant = WebVoiceAssistant.WebVoiceAssistant;
-    }
+if (typeof window !== 'undefined') {
+    export default WebVoiceAssistant;
+}
 })();
+
+// Universal export pattern
+if (typeof window !== 'undefined') {
+    window.WebVoiceAssistant = WebVoiceAssistant.WebVoiceAssistant;
+};

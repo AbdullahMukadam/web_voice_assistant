@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/web-voice-assistant)](https://www.npmjs.com/package/web-voice-assistant)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Bundle Size](https://img.shields.io/bundlephobia/min/web-voice-assistant)](https://bundlephobia.com/package/web-voice-assistant)
+[![Downloads](https://img.shields.io/npm/dm/web-voice-assistant)](https://npm-stat.com/charts.html?package=web-voice-assistant)
 
 A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.
 
@@ -12,122 +14,137 @@ A lightweight voice assistant for web applications with AI response capabilities
 - 🤖 Gemini AI integration
 - 🌐 Cross-browser support
 - ⚡ No dependencies
+- 🎨 Fully customizable UI
+- 🔌 Multiple integration options
 
 ## Installation 📦
 
-### Via npm
-
 ```bash
 npm install web-voice-assistant
+# or 
+yarn add web-voice-assistant
+# or
+pnpm add web-voice-assistant
 ```
 
-### Via CDN (Browser)
+For browser/CDN usage:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/web-voice-assistant@latest/dist/web-voice-assistant.js"></script>
-```
-
-or
-
-```html
+<script src="https://cdn.jsdelivr.net/npm/web-voice-assistant@latest/dist/web-voice-assistant.min.js"></script>
+<!-- or -->
 <script src="https://unpkg.com/web-voice-assistant"></script>
 ```
 
-## Usage
-
-### NPM Usage
+## Basic Usage
 
 ```javascript
 const assistant = new WebVoiceAssistant({
-    geminiApiKey: "",        // required
-    language: 'en-US',       // optional: English by default
-    contextSize: 5000,       // optional: context size in words
-    position: "bottom-left", // optional: position of the panel
+  geminiApiKey: "your-api-key-here", // Required
+  language: 'en-US',                // Optional
+  position: "bottom-right",         // Optional
+  buttonSize: 70,                   // Optional
+  panelWidth: 400                   // Optional
 });
 ```
 
-More properties available - check the configuration table below.
+## Complete Configuration Options
 
-### CDN Usage (Browser) - Recommended
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `geminiApiKey` | string | - | Gemini API key (Required) |
+| `model` | string | `gemini-1.5-flash` | Gemini model version |
+| `language` | string | `en-US` | Speech recognition language |
+| `position` | string | `bottom-right` | Button position |
+| `buttonSize` | number | 60 | Button size in pixels |
+| `panelWidth` | number | 350 | Panel width in pixels |
+| `panelHeight` | number | 450 | Panel height in pixels |
+| `rate` | number | 0.9 | Speech speed (0.1-2.0) |
+| `pitch` | number | 1 | Voice pitch (0-2.0) |
+| `contextSize` | number | 5000 | Context size in words |
+| `ButtonBackGroundColour` | string | `black` | Button background color |
+| `svgColor` | string | `white` | Icon color |
+| `textColor` | string | `white` | Text color |
+| `PanelBackgroundColor` | string | `rgb(24 24 27)` | Panel background |
+| `MessagesBackgroundColor` | string | `rgb(24 24 27)` | Messages background |
 
-```html
-<script>
-    // Configure before loading your script
-    window.__WEBVOICEASSISTANT_CONFIG__ = {
-        geminiApiKey: ""
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/web-voice-assistant@latest/dist/web-voice-assistant.js"></script>
+## Framework Examples
+
+### React Component
+
+```jsx
+import { useEffect } from 'react';
+import WebVoiceAssistant from 'web-voice-assistant';
+
+function VoiceAssistant() {
+  useEffect(() => {
+    const assistant = new WebVoiceAssistant({
+      geminiApiKey: process.env.REACT_APP_GEMINI_KEY,
+      position: 'bottom-left',
+      buttonSize: 70
+    });
+    return () => assistant.destroy();
+  }, []);
+
+  return null;
+}
 ```
 
-After configuration, use it like this:
+### Next.js Component
+
+```jsx
+'use client';
+import { useEffect } from 'react';
+import WebVoiceAssistant from 'web-voice-assistant';
+
+export default function VoiceAssistant() {
+  useEffect(() => {
+    const assistant = new WebVoiceAssistant({
+      geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_KEY,
+      panelWidth: 400
+    });
+    return () => assistant.destroy();
+  }, []);
+  
+  return null;
+}
+```
+
+## Available Methods
 
 ```javascript
-const assistant = new WebVoiceAssistant({
-    language: 'en-US',
-    contextSize: 5000,
-    position: "bottom-left",
-});
+const assistant = new WebVoiceAssistant(config);
+
+// Start voice listening
+assistant.startListening();
+
+// Stop voice listening 
+assistant.stopListening();
+
+// Destroy instance (cleanup DOM)
+assistant.destroy();
+
+// Get last voice command
+const command = assistant.getCommand();
 ```
 
-## Configuration Options
+## Browser Support
 
-| Option | Type | Default | Description | Required |
-|--------|------|---------|-------------|----------|
-| `geminiApiKey` | string | `undefined` | Gemini API key for AI responses | ✅ Required |
-| `model` | string | `gemini-1.5-flash` | Gemini AI model to use | Optional |
-| `maxTokens` | number | `200` | Maximum tokens for model response | Optional |
-| `temperature` | number | `0.7` | Temperature for model creativity (0-1) | Optional |
-| `language` | string | `'en-US'` | Speech recognition/synthesis language | Optional |
-| `rate` | number | `0.9` | Speech speed (0.1-2.0) | Optional |
-| `pitch` | number | `1` | Voice pitch (0-2.0) | Optional |
-| `contextSize` | number | `5000` | Context size in number of words | Optional |
-| `ButtonBackGroundColour` | string | `black` | Background color for floating button | Optional |
-| `position` | string | `bottom-right` | Position of floating button (`bottom-left` or `bottom-right`) | Optional |
-| `buttonSize` | number | `60` | Floating button size in pixels | Optional |
-| `svgColor` | string | `white` | Color for robot SVG on floating button | Optional |
-| `textColor` | string | `white` | Color for header text | Optional |
-| `panelHeight` | number | `450` | Height of the panel in pixels | Optional |
-| `panelWidth` | number | `350` | Width of the panel in pixels | Optional |
-| `PanelBackgroundColor` | string | `rgb(24 24 27)` | Background color of the panel | Optional |
-| `MessagesBackgroundColor` | string | `rgb(24 24 27)` | Background color of messages section | Optional |
+| Browser | Support |
+|---------|---------|
+| Chrome | ✅ Full |
+| Firefox | ✅ Full |
+| Edge | ✅ Full |
+| Safari | ⚠️ Partial |
+| Mobile Chrome | ✅ Full |
+| Mobile Safari | ⚠️ Partial |
 
-## Browser Support 🌍
+## Troubleshooting
 
-Works in all modern browsers with Web Speech API support:
+- **Microphone not working**: Check browser permissions
+- **API errors**: Verify your Gemini API key
+- **UI not appearing**: Ensure no CSS conflicts
+- **SSR issues**: Use dynamic imports in Next.js
 
-- **Chrome** ✅ (best experience)
-- **Edge** ✅
-- **Firefox** ✅
-- **Safari** ⚠️ (partial support)
-
-## Example
-
-```javascript
-// Basic usage
-const assistant = new WebVoiceAssistant({
-    geminiApiKey: "your-api-key-here",
-    language: 'en-US',
-    position: "bottom-right"
-});
-
-// Advanced configuration
-const assistant = new WebVoiceAssistant({
-    geminiApiKey: "your-api-key-here",
-    model: "gemini-1.5-flash",
-    language: 'en-US',
-    rate: 1.2,
-    pitch: 1.1,
-    contextSize: 3000,
-    ButtonBackGroundColour: "#007bff",
-    position: "bottom-left",
-    buttonSize: 70,
-    svgColor: "#ffffff",
-    panelHeight: 500,
-    panelWidth: 400
-});
-```
-
-## License 📜
+## License
 
 MIT © Abdullah Mukadam
