@@ -109,23 +109,6 @@ export default function VoiceAssistant() {
 }
 ```
 
-## Available Methods
-
-```javascript
-const assistant = new WebVoiceAssistant(config);
-
-// Start voice listening
-assistant.startListening();
-
-// Stop voice listening 
-assistant.stopListening();
-
-// Destroy instance (cleanup DOM)
-assistant.destroy();
-
-// Get last voice command
-const command = assistant.getCommand();
-```
 
 ## Browser Support
 

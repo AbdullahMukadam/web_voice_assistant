@@ -116,6 +116,26 @@ class WebVoiceAssistant {
 
     }
 
+    destroy = () => {
+        if (this.recognition) {
+            this.stopListening();
+
+            if (this.recognition.abort) {
+                this.recognition.abort();
+            }
+
+            this.recognition.onresult = null;
+            this.recognition.onerror = null;
+            this.recognition = null;
+        }
+
+        this.speak = null;
+        this.cancelSpeak = null;
+        this.ui = null;
+        this._userCommand = null;
+        this.context = null;
+    }
+
     processcommand = async (text) => {
         this._userCommand = text;
         this.ui.setCommand(text);

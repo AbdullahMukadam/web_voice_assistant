@@ -8,7 +8,7 @@
         root.WebVoiceAssistant = factory();
     }
 }(typeof self !== 'undefined' ? self : this, function() {
-    // WebVoiceAssistant v1.0.4
+    // WebVoiceAssistant v1.0.5
 var WebVoiceAssistant = {};
 
 (function() {

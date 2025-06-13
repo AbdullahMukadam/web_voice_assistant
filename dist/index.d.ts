@@ -9,7 +9,7 @@ declare class WebVoiceAssistant {
            pitch?: number;
            contextSize?: number;
            ButtonBackGroundColour?: string;
-           position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+           position?: 'bottom-left' | 'bottom-right';
            buttonSize?: number;
            svgColor?: string;
            textColor?: string;

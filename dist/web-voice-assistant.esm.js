@@ -1,5 +1,6 @@
 // ES Module
-// WebVoiceAssistant v1.0.4
+const BrowserWebVoiceAssistant = (function() {
+    // WebVoiceAssistant v1.0.5
 var WebVoiceAssistant = {};
 
 (function() {
@@ -976,11 +977,23 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 if (typeof window !== 'undefined') {
-    export default WebVoiceAssistant;
+    window.WebVoiceAssistant = WebVoiceAssistant;
 }
 })();
 
 // Universal export pattern
 if (typeof window !== 'undefined') {
     window.WebVoiceAssistant = WebVoiceAssistant.WebVoiceAssistant;
+}
+    return WebVoiceAssistant.WebVoiceAssistant;
+})();
+
+const SSRAssistant = function() {
+    console.warn('WebVoiceAssistant: Running in SSR mode - functionality disabled');
+    return {
+        startListening: () => {},
+        stopListening: () => {}
+    };
 };
+
+export default typeof window !== 'undefined' ? BrowserWebVoiceAssistant : SSRAssistant;

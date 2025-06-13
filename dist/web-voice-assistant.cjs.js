@@ -1,6 +1,6 @@
 // CommonJS
 (function() {
-    // WebVoiceAssistant v1.0.4
+    // WebVoiceAssistant v1.0.5
 var WebVoiceAssistant = {};
 
 (function() {

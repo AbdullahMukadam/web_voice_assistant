@@ -60,7 +60,21 @@ const wrappers = {
 })();`,
 
     esm: `// ES Module
-${fullBundle.replace('window.WebVoiceAssistant =', 'export default')};`,
+const BrowserWebVoiceAssistant = (function() {
+    ${fullBundle}
+    return WebVoiceAssistant.WebVoiceAssistant;
+})();
+
+const SSRAssistant = function() {
+    console.warn('WebVoiceAssistant: Running in SSR mode - functionality disabled');
+    return {
+        destroy: ()=> {},
+        startListening: () => {},
+        stopListening: () => {}
+    };
+};
+
+export default typeof window !== 'undefined' ? BrowserWebVoiceAssistant : SSRAssistant;`,
 
     umd: `// UMD
 (function(root, factory) {

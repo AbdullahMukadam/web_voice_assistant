@@ -25,7 +25,6 @@
     "build:browser": "node build.js --format=umd && npm run minify",
     "minify": "terser dist/web-voice-assistant.umd.js -o dist/web-voice-assistant.min.js --source-map",
     "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --outDir dist",
-    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
