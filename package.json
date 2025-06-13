@@ -1,6 +1,6 @@
 {
   "name": "web-voice-assistant",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Voice assistant for web applications with AI integration",
   "main": "dist/web-voice-assistant.js",
   "files": [
