@@ -1,6 +1,6 @@
 // ES Module
 const BrowserWebVoiceAssistant = (function() {
-    // speak-bich v1.0.8
+    // speak-bich v1.0.9
 var WebVoiceAssistant = {};
 
 (function() {
@@ -284,6 +284,7 @@ if (typeof exports !== "undefined") {
              opacity: 0;
              transform: scale(0.95) translateY(-10px);
              transition: opacity 0.3s ease, transform 0.3s ease;
+             letter-spacing: 0.4px;
             }
 
             .overlay-content-container{
@@ -293,6 +294,7 @@ if (typeof exports !== "undefined") {
              flex-direction: column;
              justify-content:space-between;
              align-items:center;
+             font-family: cursive, sans;
             }
 
             .command{
@@ -323,8 +325,8 @@ if (typeof exports !== "undefined") {
             .gif p{
              font-size:14px;
              text-align:center;
-             color: red;
-             font-weight: 400;
+             color: black;
+             font-weight: 500;
              animation: bounce 2s infinite;
             }
 
@@ -381,6 +383,7 @@ if (typeof exports !== "undefined") {
                 bottom: ${this.config.buttonSize + 15}px;
                 ${this.config.position === "bottom-left" ? "left: 0;" : "right:0;"}
                 border: 1px solid rgba(255, 255, 255, 0.2);
+                font-family: cursive, sans;
             }
 
             .wva-chat-panel.active {

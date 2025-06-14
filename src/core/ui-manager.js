@@ -182,6 +182,7 @@ WebVoiceAssistant.UIManager = class {
              opacity: 0;
              transform: scale(0.95) translateY(-10px);
              transition: opacity 0.3s ease, transform 0.3s ease;
+             letter-spacing: 0.4px;
             }
 
             .overlay-content-container{
@@ -191,6 +192,7 @@ WebVoiceAssistant.UIManager = class {
              flex-direction: column;
              justify-content:space-between;
              align-items:center;
+             font-family: cursive, sans;
             }
 
             .command{
@@ -221,8 +223,8 @@ WebVoiceAssistant.UIManager = class {
             .gif p{
              font-size:14px;
              text-align:center;
-             color: red;
-             font-weight: 400;
+             color: black;
+             font-weight: 500;
              animation: bounce 2s infinite;
             }
 
@@ -279,6 +281,7 @@ WebVoiceAssistant.UIManager = class {
                 bottom: ${this.config.buttonSize + 15}px;
                 ${this.config.position === "bottom-left" ? "left: 0;" : "right:0;"}
                 border: 1px solid rgba(255, 255, 255, 0.2);
+                font-family: cursive, sans;
             }
 
             .wva-chat-panel.active {
