@@ -124,6 +124,7 @@ if (format === 'esm') {
            panelWidth?: number;
            PanelBackgroundColor?: string;
            MessagesBackgroundColor?: string;
+           headerTextName? : string;
         });
         
     }

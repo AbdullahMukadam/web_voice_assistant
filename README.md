@@ -59,6 +59,8 @@ That's it! Your voice assistant is now active on your page.
 |--------|------|---------|-------------|
 | `geminiApiKey` | `string` | **Required** | Your Gemini API key |
 | `model` | `string` | `gemini-1.5-flash` | Gemini model version |
+| `maxTokens` | `number` | 200 | maximum tokens for Gemini  |
+| `temperature` | `number` | 0.7 | maximum temperature for Gemini |
 | `language` | `string` | `en-US` | Speech recognition language |
 | `position` | `string` | `bottom-right` | Button position (`bottom-right` \| `bottom-left`) |
 | `buttonSize` | `number` | 60 | Button size in pixels |
@@ -92,6 +94,8 @@ https://stackoverflow.com/questions/23733537/what-are-the-supported-languages-fo
 const assistant = new WebVoiceAssistant({
   geminiApiKey: "your-api-key",
   model: "gemini-1.5-pro",
+  maxTokens: 200,
+  temperature: 0.7,
   language: "en-US",
   position: "bottom-left",
   buttonSize: 70,
