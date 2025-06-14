@@ -17,6 +17,7 @@ declare class WebVoiceAssistant {
            panelWidth?: number;
            PanelBackgroundColor?: string;
            MessagesBackgroundColor?: string;
+           headerTextName? : string;
         });
         
     }

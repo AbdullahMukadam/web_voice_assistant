@@ -1,6 +1,6 @@
 // ES Module
 const BrowserWebVoiceAssistant = (function() {
-    // speak-bich v1.0.9
+    // speak-bich v1.0.11
 var WebVoiceAssistant = {};
 
 (function() {

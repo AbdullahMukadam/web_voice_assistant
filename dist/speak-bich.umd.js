@@ -8,7 +8,7 @@
         root.WebVoiceAssistant = factory();
     }
 }(typeof self !== 'undefined' ? self : this, function() {
-    // speak-bich v1.0.9
+    // speak-bich v1.0.11
 var WebVoiceAssistant = {};
 
 (function() {
