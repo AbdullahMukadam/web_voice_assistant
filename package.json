@@ -1,6 +1,6 @@
 {
   "name": "speak-bich",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Transform any web application into a voice-enabled experience with contextual AI assistance that sees and understands everything on your page.",
   "main": "dist/speak-bich.cjs.js",
   "module": "dist/speak-bich.esm.js",
