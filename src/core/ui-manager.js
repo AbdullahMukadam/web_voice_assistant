@@ -21,7 +21,8 @@ WebVoiceAssistant.UIManager = class {
             panelWidth: config.panelWidth || 350,
             panelHeight: config.panelHeight || 450,
             PanelBackgroundColor: config.PanelBackgroundColor || "rgb(24 24 27)",
-            MessagesBackgroundColor: config.MessagesBackgroundColor || "rgb(24 24 27)"
+            MessagesBackgroundColor: config.MessagesBackgroundColor || "rgb(24 24 27)",
+            headerTextName: config.headerTextName || "Voice Assistant"
         };
 
         this.injectStyles();
@@ -296,6 +297,36 @@ WebVoiceAssistant.UIManager = class {
                 letter-spacing: 0.5px;
             }
             
+            .close-btn-container{
+            width:100%;
+            padding:10px
+            }
+
+            .wva-closed-btn{
+              position: absolute;
+                top: 16px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid black;
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                color: black;
+                cursor: pointer;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+
+            .wva-closed-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            
 
             .wva-close-btn {
                 position: absolute;
@@ -529,8 +560,6 @@ WebVoiceAssistant.UIManager = class {
             @media (max-width: 480px) {
                 .wva-chat-panel {
                     width: calc(100vw - 40px);
-                    right: 20px !important;
-                    left: 20px !important;
                     height: calc(100vh - 120px);
                     max-height: ${this.config.panelHeight}px;
                 }
@@ -589,6 +618,9 @@ WebVoiceAssistant.UIManager = class {
         this.chatPanel.className = 'wva-chat-panel';
         this.chatPanel.innerHTML = `
            <div class="overlay-chat-panel">
+           <div class="close-btn-container">
+            <button class="wva-closed-btn" title="Close chat">×</button>
+           </div>
             <div class="overlay-content-container">
              <div class="command">
              <p class="command-text"></p>
@@ -600,7 +632,7 @@ WebVoiceAssistant.UIManager = class {
             </div>
            </div>
             <div class="wva-chat-header">
-                Voice Assistant
+                <h3 class="header-text-name">${this.config.headerTextName}</h3>
                 <button class="wva-close-btn" title="Close chat">×</button>
             </div>
             <div class="wva-messages"></div>
@@ -622,6 +654,7 @@ WebVoiceAssistant.UIManager = class {
         this.messagesEl = this.chatPanel.querySelector('.wva-messages');
         this.statusEl = this.chatPanel.querySelector('.wva-status');
         this.closeBtn = this.chatPanel.querySelector('.wva-close-btn');
+        this.OverlaycloseBtn = this.chatPanel.querySelector('.wva-closed-btn');
         this.recordBtn = this.chatPanel.querySelector(".wva-record-button")
         this.cancelSpeechBtn = this.chatPanel.querySelector(".cancel-speech-btn");
         this.actionsContainer = this.chatPanel.querySelector(".wva-actions-container");
@@ -650,7 +683,23 @@ WebVoiceAssistant.UIManager = class {
             }
         });
 
-        this.closeBtn.addEventListener('click', () => this.toggleChat(false));
+        this.OverlaycloseBtn.addEventListener("click", () => {
+            if (this.isListening()) {
+                this.stopListening()
+            }
+            this.toggleChat(false)
+            this.chatPanelOverlay.style.display = "none";
+            this.statusEl.textContent = "";
+        })
+
+        this.closeBtn.addEventListener('click', () => {
+            if (this.isListening()) {
+                this.stopListening()
+            }
+            this.toggleChat(false);
+            this.statusEl.textContent = "";
+            this.cancelSpeak();
+        });
 
         this.cancelSpeechBtn.addEventListener('click', () => {
             this.cancelSpeak();
@@ -699,6 +748,7 @@ WebVoiceAssistant.UIManager = class {
             this.chatPanelOverlay.style.opacity = "0";
             this.chatPanelOverlay.style.transform = "scale(0.95) translateY(-10px)";
             this.chatPanelOverlay.style.display = "none";
+            this.commandtext.classList.remove("fade-in")
             this.commandtext.textContent = "";
             this.stopListening();
             this.updateUI({ isProcessing: true });

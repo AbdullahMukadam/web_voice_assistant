@@ -1,7 +1,7 @@
 {
   "name": "speak-bich",
   "version": "1.0.8",
-  "description": "A lightweight voice assistant for web applications with AI response capabilities using the Web Speech API.",
+  "description": "Transform any web application into a voice-enabled experience with contextual AI assistance that sees and understands everything on your page.",
   "main": "dist/speak-bich.cjs.js",
   "module": "dist/speak-bich.esm.js",
   "browser": "dist/speak-bich.min.js",

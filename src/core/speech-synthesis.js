@@ -13,6 +13,7 @@ function speak(text, { language, rate } = {}) {
 
 }
 
+
 function cancelSpeak() {
     synthesis.cancel()
 }

@@ -3,7 +3,7 @@ class WebVoiceAssistant {
 
         this.speechConfig = {
             language: options.language || 'en-US',
-            rate: options.rate || 0.9
+            rate: options.rate || 0.9,
         }
 
         this.contextConfig = {
