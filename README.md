@@ -84,9 +84,6 @@ https://stackoverflow.com/questions/23733537/what-are-the-supported-languages-fo
 | `PanelBackgroundColor` | `string` | `rgb(24 24 27)` | Panel background |
 | `MessagesBackgroundColor` | `string` | `rgb(24 24 27)` | Messages background |
 
-### Visual Guide
-
-![Configuration Options Explained](https://res.cloudinary.com/dhbs6k3ue/image/upload/w_800,q_auto,f_auto/v1749883261/properties-explain_afd1hs.png)
 
 ### Advanced Configuration
 
